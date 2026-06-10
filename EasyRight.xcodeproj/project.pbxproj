@@ -1,0 +1,619 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		3CDF97A104219EB191B42A4E /* EasyRightFinderExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = DCBFBCF5800CFD888A8FF264 /* EasyRightFinderExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, CodeSignOnCopy, ); }; };
+		5040C9DDF5A14B053F28E825 /* libEasyRightCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 96972750D5E61039516210AD /* libEasyRightCore.a */; };
+		5A0F6DFC7FED606A5DD4AE6F /* ActionIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22389D4DE1ABA8DE8269637 /* ActionIdentifier.swift */; };
+		6093C0A0A4B85C6306A89286 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DAED1D281AEADF3F46059DA /* RootView.swift */; };
+		69A0EBCC8035CCFB5CEF610D /* libEasyRightCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 96972750D5E61039516210AD /* libEasyRightCore.a */; };
+		71DA4E1D7ECA13A84770D427 /* FinderSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = E64EE4E2FC57FAD36F66B36D /* FinderSync.swift */; };
+		8E8F6244BA8418644C3382AB /* EasyRightApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC18A39716631BB35E8485B /* EasyRightApp.swift */; };
+		1D687A51FACD6E1CC0BD866F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9A5EDA48B7BE29C29688ACB7 /* Assets.xcassets */; };
+		A365C0C91E17647FC215940E /* FileSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D05FDFF6F28FAFB2B9E694B /* FileSelection.swift */; };
+		A46F5523C60BE733C9865EF0 /* RightClickActionDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C860ABD5B27720CEED566F4 /* RightClickActionDescriptor.swift */; };
+		A5320E18F5CA8C5CFEF8B74B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7A1EB172F52B23F8E446AF /* SettingsView.swift */; };
+		E36EA40300F0A69349263AA3 /* ActionRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59616B1ED6A83CDCC7C3E998 /* ActionRegistry.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		0B49765FF3D09B4BA9C16AF8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F98B58062AECE50D585CBFE7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0EF59A29F06E1CE5D7391DBC;
+			remoteInfo = EasyRightCore;
+		};
+		212B44CCB7C311147CA1E3B3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F98B58062AECE50D585CBFE7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E3BF12F5FDCFFE7B0A03F486;
+			remoteInfo = EasyRightFinderExtension;
+		};
+		F751B021833B3A0114D6FED9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F98B58062AECE50D585CBFE7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0EF59A29F06E1CE5D7391DBC;
+			remoteInfo = EasyRightCore;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E051457E56ACA6F679FD7CC0 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				3CDF97A104219EB191B42A4E /* EasyRightFinderExtension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		2461374309FBADE1D2C0E1EB /* EasyRightFinderExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EasyRightFinderExtension.entitlements; sourceTree = "<group>"; };
+		2C7A1EB172F52B23F8E446AF /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		35BE0F21972EA7E4CEB499BC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3DAED1D281AEADF3F46059DA /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		59616B1ED6A83CDCC7C3E998 /* ActionRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionRegistry.swift; sourceTree = "<group>"; };
+		5D05FDFF6F28FAFB2B9E694B /* FileSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSelection.swift; sourceTree = "<group>"; };
+		6C860ABD5B27720CEED566F4 /* RightClickActionDescriptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightClickActionDescriptor.swift; sourceTree = "<group>"; };
+		6EDE78E73B3DF088A21EEC4B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7DC18A39716631BB35E8485B /* EasyRightApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EasyRightApp.swift; sourceTree = "<group>"; };
+		9483E233C764C5A59BCEAB48 /* EasyRight.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EasyRight.entitlements; sourceTree = "<group>"; };
+		96972750D5E61039516210AD /* libEasyRightCore.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libEasyRightCore.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		95B956828BAB304312AA7BE5 /* EasyRight.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EasyRight.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9A5EDA48B7BE29C29688ACB7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B22389D4DE1ABA8DE8269637 /* ActionIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionIdentifier.swift; sourceTree = "<group>"; };
+		DCBFBCF5800CFD888A8FF264 /* EasyRightFinderExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = EasyRightFinderExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		E64EE4E2FC57FAD36F66B36D /* FinderSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinderSync.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		45443183F6951FF4C037A9EE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9760C7E94E9E668396DC19E0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5040C9DDF5A14B053F28E825 /* libEasyRightCore.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E226E7D4FE40245806320181 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				69A0EBCC8035CCFB5CEF610D /* libEasyRightCore.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		26F32DA087C96AF11F5CEA7E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				95B956828BAB304312AA7BE5 /* EasyRight.app */,
+				DCBFBCF5800CFD888A8FF264 /* EasyRightFinderExtension.appex */,
+				96972750D5E61039516210AD /* libEasyRightCore.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2BA4EA480150A32D03CDB7DA /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				B22389D4DE1ABA8DE8269637 /* ActionIdentifier.swift */,
+				59616B1ED6A83CDCC7C3E998 /* ActionRegistry.swift */,
+				5D05FDFF6F28FAFB2B9E694B /* FileSelection.swift */,
+				6C860ABD5B27720CEED566F4 /* RightClickActionDescriptor.swift */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		6488D6FCC222236D779349F2 /* EasyRightFinderExtension */ = {
+			isa = PBXGroup;
+			children = (
+				E64EE4E2FC57FAD36F66B36D /* FinderSync.swift */,
+				2461374309FBADE1D2C0E1EB /* EasyRightFinderExtension.entitlements */,
+				89656A20E68DDDE6A280D1E0 /* Resources */,
+			);
+			path = EasyRightFinderExtension;
+			sourceTree = "<group>";
+		};
+		6FAFE97503A503EA477117D6 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				9A5EDA48B7BE29C29688ACB7 /* Assets.xcassets */,
+				6EDE78E73B3DF088A21EEC4B /* Info.plist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		89656A20E68DDDE6A280D1E0 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				35BE0F21972EA7E4CEB499BC /* Info.plist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		9E73A7B91B78F46237F9FED4 /* EasyRight */ = {
+			isa = PBXGroup;
+			children = (
+				E8A8304C7B9AE393D08812CB /* Application */,
+				9483E233C764C5A59BCEAB48 /* EasyRight.entitlements */,
+				6FAFE97503A503EA477117D6 /* Resources */,
+			);
+			path = EasyRight;
+			sourceTree = "<group>";
+		};
+		BA95A37E765BF0CCF437AF9D /* EasyRightCore */ = {
+			isa = PBXGroup;
+			children = (
+				2BA4EA480150A32D03CDB7DA /* Sources */,
+			);
+			path = EasyRightCore;
+			sourceTree = "<group>";
+		};
+		BD7D01DDE3F25AAAEE957FE0 = {
+			isa = PBXGroup;
+			children = (
+				9E73A7B91B78F46237F9FED4 /* EasyRight */,
+				BA95A37E765BF0CCF437AF9D /* EasyRightCore */,
+				6488D6FCC222236D779349F2 /* EasyRightFinderExtension */,
+				26F32DA087C96AF11F5CEA7E /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E8A8304C7B9AE393D08812CB /* Application */ = {
+			isa = PBXGroup;
+			children = (
+				7DC18A39716631BB35E8485B /* EasyRightApp.swift */,
+				3DAED1D281AEADF3F46059DA /* RootView.swift */,
+				2C7A1EB172F52B23F8E446AF /* SettingsView.swift */,
+			);
+			path = Application;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		0EF59A29F06E1CE5D7391DBC /* EasyRightCore */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E47F5902B1CDDDB5F5FBD541 /* Build configuration list for PBXNativeTarget "EasyRightCore" */;
+			buildPhases = (
+				9C436F20776AEECA2B000E8B /* Sources */,
+				45443183F6951FF4C037A9EE /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = EasyRightCore;
+			productName = EasyRightCore;
+			productReference = 96972750D5E61039516210AD /* libEasyRightCore.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		957BBFA4A845F7F9E20E8BE0 /* EasyRight */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6E94F9E21BCF66150502EFC0 /* Build configuration list for PBXNativeTarget "EasyRight" */;
+			buildPhases = (
+				A1A0F5D9C8E4CC8FB3150482 /* Sources */,
+				E226E7D4FE40245806320181 /* Frameworks */,
+				EC894F36398323DB51AE808B /* Resources */,
+				E051457E56ACA6F679FD7CC0 /* Embed App Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				67D720DAB24D6F6C6D0CDCB3 /* PBXTargetDependency */,
+				AEBC8FA2EEDBF16AC44F4CAB /* PBXTargetDependency */,
+			);
+			name = EasyRight;
+			productName = EasyRight;
+			productReference = 95B956828BAB304312AA7BE5 /* EasyRight.app */;
+			productType = "com.apple.product-type.application";
+		};
+		E3BF12F5FDCFFE7B0A03F486 /* EasyRightFinderExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E3760C6BF500140E087A31AB /* Build configuration list for PBXNativeTarget "EasyRightFinderExtension" */;
+			buildPhases = (
+				F4F23E64E99AA420503CD42B /* Sources */,
+				9760C7E94E9E668396DC19E0 /* Frameworks */,
+				4CCFB5799344A19C21797072 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EE8937EC64178616D255ABE4 /* PBXTargetDependency */,
+			);
+			name = EasyRightFinderExtension;
+			productName = EasyRightFinderExtension;
+			productReference = DCBFBCF5800CFD888A8FF264 /* EasyRightFinderExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F98B58062AECE50D585CBFE7 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2650;
+				LastUpgradeCheck = 2650;
+				TargetAttributes = {
+					0EF59A29F06E1CE5D7391DBC = {
+						CreatedOnToolsVersion = 26.5;
+					};
+					957BBFA4A845F7F9E20E8BE0 = {
+						CreatedOnToolsVersion = 26.5;
+					};
+					E3BF12F5FDCFFE7B0A03F486 = {
+						CreatedOnToolsVersion = 26.5;
+					};
+				};
+			};
+			buildConfigurationList = 66CE1CEC95942EADA5DB23E2 /* Build configuration list for PBXProject "EasyRight" */;
+			compatibilityVersion = "Xcode 16.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = BD7D01DDE3F25AAAEE957FE0;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 26F32DA087C96AF11F5CEA7E /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				957BBFA4A845F7F9E20E8BE0 /* EasyRight */,
+				E3BF12F5FDCFFE7B0A03F486 /* EasyRightFinderExtension */,
+				0EF59A29F06E1CE5D7391DBC /* EasyRightCore */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		4CCFB5799344A19C21797072 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EC894F36398323DB51AE808B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1D687A51FACD6E1CC0BD866F /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		9C436F20776AEECA2B000E8B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5A0F6DFC7FED606A5DD4AE6F /* ActionIdentifier.swift in Sources */,
+				E36EA40300F0A69349263AA3 /* ActionRegistry.swift in Sources */,
+				A365C0C91E17647FC215940E /* FileSelection.swift in Sources */,
+				A46F5523C60BE733C9865EF0 /* RightClickActionDescriptor.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1A0F5D9C8E4CC8FB3150482 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8E8F6244BA8418644C3382AB /* EasyRightApp.swift in Sources */,
+				6093C0A0A4B85C6306A89286 /* RootView.swift in Sources */,
+				A5320E18F5CA8C5CFEF8B74B /* SettingsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F4F23E64E99AA420503CD42B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				71DA4E1D7ECA13A84770D427 /* FinderSync.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		67D720DAB24D6F6C6D0CDCB3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0EF59A29F06E1CE5D7391DBC /* EasyRightCore */;
+			targetProxy = 0B49765FF3D09B4BA9C16AF8 /* PBXContainerItemProxy */;
+		};
+		AEBC8FA2EEDBF16AC44F4CAB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E3BF12F5FDCFFE7B0A03F486 /* EasyRightFinderExtension */;
+			targetProxy = 212B44CCB7C311147CA1E3B3 /* PBXContainerItemProxy */;
+		};
+		EE8937EC64178616D255ABE4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0EF59A29F06E1CE5D7391DBC /* EasyRightCore */;
+			targetProxy = F751B021833B3A0114D6FED9 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		22F6257279AC57835D65A0B6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		3DC54E86DEA1F2FD5D3EBBE4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = EasyRightFinderExtension/EasyRightFinderExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = EasyRightFinderExtension/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tiv.EasyRight.FinderExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 6.0;
+				WRAPPER_EXTENSION = appex;
+			};
+			name = Release;
+		};
+		66CE1CEC95942EADA5DB23E2 /* Build configuration list for PBXProject "EasyRight" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				22F6257279AC57835D65A0B6 /* Debug */,
+				DBBF00C6BA54F4CD013BB39A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6E94F9E21BCF66150502EFC0 /* Build configuration list for PBXNativeTarget "EasyRight" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A10F85B8334F6801320AB30F /* Debug */,
+				B7CDD824F25872DA3018C707 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7F28C05882C997220E4BA5B3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEFINES_MODULE = YES;
+				MACH_O_TYPE = staticlib;
+				PRODUCT_NAME = EasyRightCore;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		9D9BEF4F551FFF663B2D0FF0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEFINES_MODULE = YES;
+				MACH_O_TYPE = staticlib;
+				PRODUCT_NAME = EasyRightCore;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		A10F85B8334F6801320AB30F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = EasyRight/EasyRight.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = EasyRight/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tiv.EasyRight;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		AA979B5AB85FDAB16F25E95F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = EasyRightFinderExtension/EasyRightFinderExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = EasyRightFinderExtension/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tiv.EasyRight.FinderExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 6.0;
+				WRAPPER_EXTENSION = appex;
+			};
+			name = Debug;
+		};
+		B7CDD824F25872DA3018C707 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = EasyRight/EasyRight.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = EasyRight/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tiv.EasyRight;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		DBBF00C6BA54F4CD013BB39A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		E3760C6BF500140E087A31AB /* Build configuration list for PBXNativeTarget "EasyRightFinderExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA979B5AB85FDAB16F25E95F /* Debug */,
+				3DC54E86DEA1F2FD5D3EBBE4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E47F5902B1CDDDB5F5FBD541 /* Build configuration list for PBXNativeTarget "EasyRightCore" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9D9BEF4F551FFF663B2D0FF0 /* Debug */,
+				7F28C05882C997220E4BA5B3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCBuildConfiguration section */
+	};
+	rootObject = F98B58062AECE50D585CBFE7 /* Project object */;
+}
