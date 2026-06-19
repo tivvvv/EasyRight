@@ -6,6 +6,7 @@ import EasyRightCore
 
 final class FinderSync: FIFinderSync {
     private let actionRegistry = ActionRegistry.standard
+    private let actionExecutor = ActionExecutor()
     private let logger = Logger(subsystem: "com.tiv.EasyRight.FinderExtension", category: "FinderSync")
 
     override init() {
@@ -18,9 +19,9 @@ final class FinderSync: FIFinderSync {
     }
 
     override func menu(for _: FIMenuKind) -> NSMenu? {
-        let selectedURLs = FIFinderSyncController.default().selectedItemURLs() ?? []
-        let selection = FileSelection(urls: selectedURLs)
-        let availableActions = actionRegistry.availableActions(for: selection)
+        let availableActions = actionRegistry
+            .availableActions(for: currentSelection)
+            .filter(actionExecutor.canExecute)
 
         let rootMenu = NSMenu(title: "EasyRight")
         let rootItem = NSMenuItem(title: "EasyRight", action: nil, keyEquivalent: "")
@@ -54,7 +55,25 @@ final class FinderSync: FIFinderSync {
             return
         }
 
-        // 这里先记录动作入口, 下一步会接入真正的执行器.
-        logger.info("Selected EasyRight action: \(rawActionID, privacy: .public)")
+        let actionID = ActionIdentifier(rawValue: rawActionID)
+
+        guard let action = actionRegistry.action(with: actionID) else {
+            logger.error("Unknown action identifier: \(rawActionID, privacy: .public)")
+            return
+        }
+
+        let context = ActionExecutionContext(selection: currentSelection)
+
+        do {
+            let result = try actionExecutor.execute(action, context: context)
+            logger.info("EasyRight action completed: \(result.message, privacy: .public)")
+        } catch {
+            logger.error("EasyRight action failed: \(String(describing: error), privacy: .public)")
+        }
+    }
+
+    private var currentSelection: FileSelection {
+        let selectedURLs = FIFinderSyncController.default().selectedItemURLs() ?? []
+        return FileSelection(urls: selectedURLs)
     }
 }

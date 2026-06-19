@@ -19,6 +19,10 @@ public struct ActionRegistry: Sendable {
     public func availableActions(for selection: FileSelection) -> [RightClickActionDescriptor] {
         actions.filter { $0.isAvailable(for: selection) }
     }
+
+    public func action(with id: ActionIdentifier) -> RightClickActionDescriptor? {
+        actions.first { $0.id == id }
+    }
 }
 
 public extension RightClickActionDescriptor {
