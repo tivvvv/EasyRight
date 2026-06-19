@@ -3,6 +3,7 @@ import Foundation
 /// 动作执行器只负责调度已实现的轻量动作.
 public final class ActionExecutor {
     public static let supportedActionIDs: Set<ActionIdentifier> = [
+        .copyFileName,
         .copyPath,
     ]
 
@@ -26,6 +27,8 @@ public final class ActionExecutor {
         }
 
         switch action.id {
+        case .copyFileName:
+            return try copyFileName(context: context)
         case .copyPath:
             return try copyPath(context: context)
         default:
@@ -34,15 +37,35 @@ public final class ActionExecutor {
     }
 
     private func copyPath(context: ActionExecutionContext) throws -> ActionExecutionResult {
-        let paths = context.selection.urls.map(\.path)
+        try copyValues(
+            context.selection.urls.map(\.path),
+            singularName: "path",
+            pluralName: "paths"
+        )
+    }
 
-        guard !paths.isEmpty else {
+    private func copyFileName(context: ActionExecutionContext) throws -> ActionExecutionResult {
+        try copyValues(
+            context.selection.urls.map(\.lastPathComponent),
+            singularName: "file name",
+            pluralName: "file names"
+        )
+    }
+
+    private func copyValues(
+        _ values: [String],
+        singularName: String,
+        pluralName: String
+    ) throws -> ActionExecutionResult {
+        let copyableValues = values.filter { !$0.isEmpty }
+
+        guard !copyableValues.isEmpty else {
             throw ActionExecutionError.emptySelection
         }
 
-        try pasteboardWriter.writeString(paths.joined(separator: "\n"))
+        try pasteboardWriter.writeString(copyableValues.joined(separator: "\n"))
 
-        let noun = paths.count == 1 ? "path" : "paths"
-        return ActionExecutionResult(message: "Copied \(paths.count) \(noun).")
+        let noun = copyableValues.count == 1 ? singularName : pluralName
+        return ActionExecutionResult(message: "Copied \(copyableValues.count) \(noun).")
     }
 }
