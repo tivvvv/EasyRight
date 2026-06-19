@@ -1,10 +1,16 @@
 import SwiftUI
+
 import EasyRightCore
 
 struct RootView: View {
     let actionRegistry: ActionRegistry
 
     @State private var selectedActionID: ActionIdentifier?
+
+    init(actionRegistry: ActionRegistry) {
+        self.actionRegistry = actionRegistry
+        _selectedActionID = State(initialValue: actionRegistry.actions.first?.id)
+    }
 
     var body: some View {
         NavigationSplitView {

@@ -1,7 +1,8 @@
 import Cocoa
 import FinderSync
-import EasyRightCore
 import OSLog
+
+import EasyRightCore
 
 final class FinderSync: FIFinderSync {
     private let actionRegistry = ActionRegistry.standard
@@ -16,7 +17,7 @@ final class FinderSync: FIFinderSync {
         ]
     }
 
-    override func menu(for menuKind: FIMenuKind) -> NSMenu? {
+    override func menu(for _: FIMenuKind) -> NSMenu? {
         let selectedURLs = FIFinderSyncController.default().selectedItemURLs() ?? []
         let selection = FileSelection(urls: selectedURLs)
         let availableActions = actionRegistry.availableActions(for: selection)
@@ -31,7 +32,11 @@ final class FinderSync: FIFinderSync {
             submenu.addItem(item)
         } else {
             availableActions.forEach { action in
-                let item = NSMenuItem(title: action.title, action: #selector(handleAction(_:)), keyEquivalent: "")
+                let item = NSMenuItem(
+                    title: action.title,
+                    action: #selector(handleAction(_:)),
+                    keyEquivalent: ""
+                )
                 item.target = self
                 item.representedObject = action.id.rawValue
                 submenu.addItem(item)
