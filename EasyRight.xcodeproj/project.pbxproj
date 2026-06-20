@@ -23,6 +23,7 @@
 		A365C0C91E17647FC215940E /* FileSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D05FDFF6F28FAFB2B9E694B /* FileSelection.swift */; };
 		A46F5523C60BE733C9865EF0 /* RightClickActionDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C860ABD5B27720CEED566F4 /* RightClickActionDescriptor.swift */; };
 		A5320E18F5CA8C5CFEF8B74B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7A1EB172F52B23F8E446AF /* SettingsView.swift */; };
+		35E682B3540640B6B850D69F /* TerminalOpener.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2325E3CE46EC49E6B3E28F70 /* TerminalOpener.swift */; };
 		D2E1CED7986643B4AA5DEE44 /* ActionExecutorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D28056BBB2CD40818B4762D1 /* ActionExecutorTests.swift */; };
 		D7D45CC56FE5405EBB590A30 /* ActionExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49878F015F21443AA19A3105 /* ActionExecutor.swift */; };
 		E36EA40300F0A69349263AA3 /* ActionRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59616B1ED6A83CDCC7C3E998 /* ActionRegistry.swift */; };
@@ -77,6 +78,7 @@
 		2461374309FBADE1D2C0E1EB /* EasyRightFinderExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EasyRightFinderExtension.entitlements; sourceTree = "<group>"; };
 		2C7A1EB172F52B23F8E446AF /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		35BE0F21972EA7E4CEB499BC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		2325E3CE46EC49E6B3E28F70 /* TerminalOpener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalOpener.swift; sourceTree = "<group>"; };
 		3DAED1D281AEADF3F46059DA /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		49878F015F21443AA19A3105 /* ActionExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionExecutor.swift; sourceTree = "<group>"; };
 		59616B1ED6A83CDCC7C3E998 /* ActionRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionRegistry.swift; sourceTree = "<group>"; };
@@ -165,6 +167,7 @@
 				88FB38E6D302478BA2461324 /* ActionExecutionResult.swift */,
 				49878F015F21443AA19A3105 /* ActionExecutor.swift */,
 				93DAAC2365A3498B99C7F681 /* PasteboardWriter.swift */,
+				2325E3CE46EC49E6B3E28F70 /* TerminalOpener.swift */,
 			);
 			path = Execution;
 			sourceTree = "<group>";
@@ -403,6 +406,7 @@
 				E36EA40300F0A69349263AA3 /* ActionRegistry.swift in Sources */,
 				A365C0C91E17647FC215940E /* FileSelection.swift in Sources */,
 				8E73FF5D6CBF4893921EF10A /* PasteboardWriter.swift in Sources */,
+				35E682B3540640B6B850D69F /* TerminalOpener.swift in Sources */,
 				A46F5523C60BE733C9865EF0 /* RightClickActionDescriptor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -8,17 +8,21 @@ public final class ActionExecutor {
         .copyPath,
         .createFolder,
         .createTextFile,
+        .openTerminalHere,
     ]
 
     private let fileCreator: FileCreating
     private let pasteboardWriter: PasteboardWriting
+    private let terminalOpener: TerminalOpening
 
     public init(
         fileCreator: FileCreating = SystemFileCreator(),
-        pasteboardWriter: PasteboardWriting = SystemPasteboardWriter()
+        pasteboardWriter: PasteboardWriting = SystemPasteboardWriter(),
+        terminalOpener: TerminalOpening = SystemTerminalOpener()
     ) {
         self.fileCreator = fileCreator
         self.pasteboardWriter = pasteboardWriter
+        self.terminalOpener = terminalOpener
     }
 
     public func canExecute(_ action: RightClickActionDescriptor) -> Bool {
@@ -45,6 +49,8 @@ public final class ActionExecutor {
             return try createFolder(context: context)
         case .createTextFile:
             return try createTextFile(context: context)
+        case .openTerminalHere:
+            return try openTerminalHere(context: context)
         default:
             throw ActionExecutionError.unsupportedAction(action.id)
         }
@@ -101,6 +107,19 @@ public final class ActionExecutor {
         return ActionExecutionResult(message: "Created \(folderURL.lastPathComponent).")
     }
 
+    private func openTerminalHere(context: ActionExecutionContext) throws -> ActionExecutionResult {
+        let directoryURLs = uniqueURLs(context.selection.urls.map(\.easyRightDirectoryURL))
+
+        guard !directoryURLs.isEmpty else {
+            throw ActionExecutionError.emptySelection
+        }
+
+        try terminalOpener.openTerminal(at: directoryURLs)
+
+        let noun = directoryURLs.count == 1 ? "directory" : "directories"
+        return ActionExecutionResult(message: "Opened \(directoryURLs.count) \(noun) in Terminal.")
+    }
+
     private func singleSelectedURL(context: ActionExecutionContext) throws -> URL {
         guard context.selection.urls.count == 1 else {
             throw ActionExecutionError.invalidSelectionCount(
@@ -138,6 +157,14 @@ public final class ActionExecutor {
 
         return values.filter { value in
             seenValues.insert(value).inserted
+        }
+    }
+
+    private func uniqueURLs(_ urls: [URL]) -> [URL] {
+        var seenPaths = Set<String>()
+
+        return urls.filter { url in
+            seenPaths.insert(url.standardizedFileURL.path).inserted
         }
     }
 }

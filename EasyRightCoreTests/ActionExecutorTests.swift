@@ -160,6 +160,81 @@ final class ActionExecutorTests: XCTestCase {
         XCTAssertEqual(fileCreator.createdDirectoryURLs, [targetURL])
     }
 
+    func testOpenTerminalHereOpensSelectedFileDirectory() throws {
+        let terminalOpener = SpyTerminalOpener()
+        let executor = ActionExecutor(
+            fileCreator: SpyFileCreator(),
+            pasteboardWriter: SpyPasteboardWriter(),
+            terminalOpener: terminalOpener
+        )
+        let selectedURL = URL(fileURLWithPath: "/Users/example/Documents/Source.md")
+
+        let result = try executor.execute(
+            .openTerminalHere,
+            context: makeContext(urls: [selectedURL])
+        )
+
+        XCTAssertEqual(
+            terminalOpener.openedDirectoryURLBatches.map { batch in
+                batch.map { $0.standardizedFileURL.path }
+            },
+            [[selectedURL.deletingLastPathComponent().standardizedFileURL.path]]
+        )
+        XCTAssertEqual(result.message, "Opened 1 directory in Terminal.")
+    }
+
+    func testOpenTerminalHereOpensSelectedDirectory() throws {
+        let terminalOpener = SpyTerminalOpener()
+        let executor = ActionExecutor(
+            fileCreator: SpyFileCreator(),
+            pasteboardWriter: SpyPasteboardWriter(),
+            terminalOpener: terminalOpener
+        )
+        let selectedURL = URL(fileURLWithPath: "/Users/example/Documents", isDirectory: true)
+
+        let result = try executor.execute(
+            .openTerminalHere,
+            context: makeContext(urls: [selectedURL])
+        )
+
+        XCTAssertEqual(
+            terminalOpener.openedDirectoryURLBatches.map { batch in
+                batch.map { $0.standardizedFileURL.path }
+            },
+            [[selectedURL.standardizedFileURL.path]]
+        )
+        XCTAssertEqual(result.message, "Opened 1 directory in Terminal.")
+    }
+
+    func testOpenTerminalHereOpensUniqueDirectories() throws {
+        let terminalOpener = SpyTerminalOpener()
+        let executor = ActionExecutor(
+            fileCreator: SpyFileCreator(),
+            pasteboardWriter: SpyPasteboardWriter(),
+            terminalOpener: terminalOpener
+        )
+        let firstURL = URL(fileURLWithPath: "/Users/example/Documents/Alpha.txt")
+        let secondURL = URL(fileURLWithPath: "/Users/example/Documents/Beta.md")
+        let thirdURL = URL(fileURLWithPath: "/Users/example/Downloads", isDirectory: true)
+        let expectedPaths = [
+            firstURL.deletingLastPathComponent().standardizedFileURL.path,
+            thirdURL.standardizedFileURL.path,
+        ]
+
+        let result = try executor.execute(
+            .openTerminalHere,
+            context: makeContext(urls: [firstURL, secondURL, thirdURL])
+        )
+
+        XCTAssertEqual(
+            terminalOpener.openedDirectoryURLBatches.map { batch in
+                batch.map { $0.standardizedFileURL.path }
+            },
+            [expectedPaths]
+        )
+        XCTAssertEqual(result.message, "Opened 2 directories in Terminal.")
+    }
+
     func testUnavailableActionThrowsBeforeWriting() {
         let pasteboardWriter = SpyPasteboardWriter()
         let executor = ActionExecutor(
@@ -188,16 +263,16 @@ final class ActionExecutorTests: XCTestCase {
         )
         let selectedURL = URL(fileURLWithPath: "/Users/example/Documents")
 
-        XCTAssertFalse(executor.canExecute(.openTerminalHere))
+        XCTAssertFalse(executor.canExecute(.openWithCode))
         XCTAssertThrowsError(
             try executor.execute(
-                .openTerminalHere,
+                .openWithCode,
                 context: makeContext(urls: [selectedURL])
             )
         ) { error in
             XCTAssertEqual(
                 error as? ActionExecutionError,
-                .unsupportedAction(.openTerminalHere)
+                .unsupportedAction(.openWithCode)
             )
         }
     }
@@ -305,6 +380,7 @@ final class ActionRegistryTests: XCTestCase {
         XCTAssertTrue(actionIDs.contains(.copyDirectoryPath))
         XCTAssertTrue(actionIDs.contains(.createTextFile))
         XCTAssertTrue(actionIDs.contains(.createFolder))
+        XCTAssertTrue(actionIDs.contains(.openTerminalHere))
     }
 
     func testStandardRegistryHidesCreateActionsForMultipleSelection() {
@@ -321,6 +397,7 @@ final class ActionRegistryTests: XCTestCase {
         XCTAssertTrue(actionIDs.contains(.copyDirectoryPath))
         XCTAssertFalse(actionIDs.contains(.createTextFile))
         XCTAssertFalse(actionIDs.contains(.createFolder))
+        XCTAssertTrue(actionIDs.contains(.openTerminalHere))
     }
 }
 
@@ -389,6 +466,19 @@ private final class SpyFileCreator: FileCreating {
         }
 
         createdDirectoryURLs.append(directoryURL)
+    }
+}
+
+private final class SpyTerminalOpener: TerminalOpening {
+    private(set) var openedDirectoryURLBatches: [[URL]] = []
+    var errorToThrow: Error?
+
+    func openTerminal(at directoryURLs: [URL]) throws {
+        if let errorToThrow {
+            throw errorToThrow
+        }
+
+        openedDirectoryURLBatches.append(directoryURLs)
     }
 }
 

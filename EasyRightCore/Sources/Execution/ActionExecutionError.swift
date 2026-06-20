@@ -6,6 +6,7 @@ public enum ActionExecutionError: Error, Equatable, Sendable {
     case emptySelection
     case fileCreationFailed(URL)
     case invalidSelectionCount(expected: Int, actual: Int)
+    case terminalApplicationNotFound
     case unavailableAction(ActionIdentifier)
     case unsupportedAction(ActionIdentifier)
     case pasteboardWriteFailed
