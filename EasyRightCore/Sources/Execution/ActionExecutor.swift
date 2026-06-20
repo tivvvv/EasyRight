@@ -3,6 +3,7 @@ import Foundation
 /// 动作执行器只负责调度已实现的轻量动作.
 public final class ActionExecutor {
     public static let supportedActionIDs: Set<ActionIdentifier> = [
+        .copyDirectoryPath,
         .copyFileName,
         .copyPath,
     ]
@@ -27,6 +28,8 @@ public final class ActionExecutor {
         }
 
         switch action.id {
+        case .copyDirectoryPath:
+            return try copyDirectoryPath(context: context)
         case .copyFileName:
             return try copyFileName(context: context)
         case .copyPath:
@@ -41,6 +44,14 @@ public final class ActionExecutor {
             context.selection.urls.map(\.path),
             singularName: "path",
             pluralName: "paths"
+        )
+    }
+
+    private func copyDirectoryPath(context: ActionExecutionContext) throws -> ActionExecutionResult {
+        try copyValues(
+            uniqueValues(context.selection.urls.map(\.easyRightDirectoryPath)),
+            singularName: "directory path",
+            pluralName: "directory paths"
         )
     }
 
@@ -67,5 +78,24 @@ public final class ActionExecutor {
 
         let noun = copyableValues.count == 1 ? singularName : pluralName
         return ActionExecutionResult(message: "Copied \(copyableValues.count) \(noun).")
+    }
+
+    private func uniqueValues(_ values: [String]) -> [String] {
+        var seenValues = Set<String>()
+
+        return values.filter { value in
+            seenValues.insert(value).inserted
+        }
+    }
+}
+
+private extension URL {
+    var easyRightDirectoryPath: String {
+        let directoryURL = easyRightIsDirectory ? self : deletingLastPathComponent()
+        return directoryURL.standardizedFileURL.path
+    }
+
+    var easyRightIsDirectory: Bool {
+        (try? resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? hasDirectoryPath
     }
 }
