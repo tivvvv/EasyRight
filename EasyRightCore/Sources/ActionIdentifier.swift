@@ -13,6 +13,7 @@ public extension ActionIdentifier {
     static let copyPath = ActionIdentifier(rawValue: "copy_path")
     static let copyFileName = ActionIdentifier(rawValue: "copy_file_name")
     static let copyDirectoryPath = ActionIdentifier(rawValue: "copy_directory_path")
+    static let createTextFile = ActionIdentifier(rawValue: "create_text_file")
     static let openTerminalHere = ActionIdentifier(rawValue: "open_terminal_here")
     static let openWithCode = ActionIdentifier(rawValue: "open_with_code")
 }

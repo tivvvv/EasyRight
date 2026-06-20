@@ -6,6 +6,7 @@ public struct ActionRegistry: Sendable {
         .copyPath,
         .copyFileName,
         .copyDirectoryPath,
+        .createTextFile,
         .openTerminalHere,
         .openWithCode,
     ])
@@ -45,6 +46,13 @@ public extension RightClickActionDescriptor {
         title: "Copy Directory Path",
         systemImageName: "folder",
         selectionRule: .nonEmptySelection
+    )
+
+    static let createTextFile = RightClickActionDescriptor(
+        id: .createTextFile,
+        title: "Create Text File",
+        systemImageName: "doc.badge.plus",
+        selectionRule: .singleItem
     )
 
     static let openTerminalHere = RightClickActionDescriptor(
