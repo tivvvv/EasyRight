@@ -86,18 +86,18 @@ public final class ActionExecutor {
     private func createTextFile(context: ActionExecutionContext) throws -> ActionExecutionResult {
         let selectedURL = try singleSelectedURL(context: context)
         let directoryURL = selectedURL.easyRightDirectoryURL
-        let fileName = try normalizedItemName(
-            itemNamePrompter.promptForItemName(
-                title: "Create Text File",
-                message: "Enter the new text file name.",
-                defaultName: "Untitled.txt"
-            )
+        let fileName = try itemNamePrompter.promptForFileName(
+            title: "Create File",
+            message: "Enter the new file name and extension.",
+            defaultBaseName: "Untitled",
+            defaultFileExtension: "txt"
         )
-        let fileNameComponents = textFileNameComponents(from: fileName)
+        let baseName = try normalizedItemName(fileName.baseName)
+        let fileExtension = try normalizedFileExtension(fileName.fileExtension)
         let fileURL = fileCreator.availableFileURL(
             in: directoryURL,
-            baseName: fileNameComponents.baseName,
-            fileExtension: fileNameComponents.fileExtension
+            baseName: baseName,
+            fileExtension: fileExtension
         )
 
         try fileCreator.createEmptyFile(at: fileURL)
@@ -109,7 +109,7 @@ public final class ActionExecutor {
         let selectedURL = try singleSelectedURL(context: context)
         let directoryURL = selectedURL.easyRightDirectoryURL
         let folderName = try normalizedItemName(
-            itemNamePrompter.promptForItemName(
+            itemNamePrompter.promptForFolderName(
                 title: "Create Folder",
                 message: "Enter the new folder name.",
                 defaultName: "Untitled Folder"
@@ -153,21 +153,27 @@ public final class ActionExecutor {
         return name
     }
 
-    private func textFileNameComponents(from name: String) -> (
-        baseName: String,
-        fileExtension: String
-    ) {
-        guard let dotIndex = name.lastIndex(of: "."),
-              dotIndex != name.startIndex,
-              dotIndex < name.index(before: name.endIndex)
-        else {
-            return (baseName: name, fileExtension: "txt")
+    private func normalizedFileExtension(_ rawFileExtension: String) throws -> String {
+        var fileExtension = rawFileExtension.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        while fileExtension.first == "." {
+            fileExtension.removeFirst()
         }
 
-        return (
-            baseName: String(name[..<dotIndex]),
-            fileExtension: String(name[name.index(after: dotIndex)...])
+        let extensionParts = fileExtension.split(
+            separator: ".",
+            omittingEmptySubsequences: false
         )
+
+        guard !fileExtension.isEmpty,
+              extensionParts.allSatisfy({ !$0.isEmpty }),
+              !fileExtension.contains("/"),
+              !fileExtension.contains(":")
+        else {
+            throw ActionExecutionError.invalidFileExtension(rawFileExtension)
+        }
+
+        return fileExtension
     }
 
     private func singleSelectedURL(context: ActionExecutionContext) throws -> URL {

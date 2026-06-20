@@ -51,7 +51,7 @@ public extension RightClickActionDescriptor {
 
     static let createTextFile = RightClickActionDescriptor(
         id: .createTextFile,
-        title: "Create Text File",
+        title: "Create File",
         systemImageName: "doc.badge.plus",
         selectionRule: .singleItem
     )

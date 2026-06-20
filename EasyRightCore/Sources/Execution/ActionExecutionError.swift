@@ -5,6 +5,7 @@ public enum ActionExecutionError: Error, Equatable, Sendable {
     case directoryCreationFailed(URL)
     case emptySelection
     case fileCreationFailed(URL)
+    case invalidFileExtension(String)
     case invalidItemName(String)
     case invalidSelectionCount(expected: Int, actual: Int)
     case nameInputCancelled
