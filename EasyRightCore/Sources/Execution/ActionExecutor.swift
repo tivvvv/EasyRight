@@ -6,6 +6,7 @@ public final class ActionExecutor {
         .copyDirectoryPath,
         .copyFileName,
         .copyPath,
+        .createFolder,
         .createTextFile,
     ]
 
@@ -40,6 +41,8 @@ public final class ActionExecutor {
             return try copyFileName(context: context)
         case .copyPath:
             return try copyPath(context: context)
+        case .createFolder:
+            return try createFolder(context: context)
         case .createTextFile:
             return try createTextFile(context: context)
         default:
@@ -72,6 +75,33 @@ public final class ActionExecutor {
     }
 
     private func createTextFile(context: ActionExecutionContext) throws -> ActionExecutionResult {
+        let selectedURL = try singleSelectedURL(context: context)
+        let directoryURL = selectedURL.easyRightDirectoryURL
+        let fileURL = fileCreator.availableFileURL(
+            in: directoryURL,
+            baseName: "Untitled",
+            fileExtension: "txt"
+        )
+
+        try fileCreator.createEmptyFile(at: fileURL)
+
+        return ActionExecutionResult(message: "Created \(fileURL.lastPathComponent).")
+    }
+
+    private func createFolder(context: ActionExecutionContext) throws -> ActionExecutionResult {
+        let selectedURL = try singleSelectedURL(context: context)
+        let directoryURL = selectedURL.easyRightDirectoryURL
+        let folderURL = fileCreator.availableDirectoryURL(
+            in: directoryURL,
+            baseName: "Untitled Folder"
+        )
+
+        try fileCreator.createDirectory(at: folderURL)
+
+        return ActionExecutionResult(message: "Created \(folderURL.lastPathComponent).")
+    }
+
+    private func singleSelectedURL(context: ActionExecutionContext) throws -> URL {
         guard context.selection.urls.count == 1 else {
             throw ActionExecutionError.invalidSelectionCount(
                 expected: 1,
@@ -83,16 +113,7 @@ public final class ActionExecutor {
             throw ActionExecutionError.emptySelection
         }
 
-        let directoryURL = selectedURL.easyRightDirectoryURL
-        let fileURL = fileCreator.availableFileURL(
-            in: directoryURL,
-            baseName: "Untitled",
-            fileExtension: "txt"
-        )
-
-        try fileCreator.createEmptyFile(at: fileURL)
-
-        return ActionExecutionResult(message: "Created \(fileURL.lastPathComponent).")
+        return selectedURL
     }
 
     private func copyValues(
@@ -129,10 +150,17 @@ public protocol FileCreating: AnyObject {
         fileExtension: String
     ) -> URL
 
+    func availableDirectoryURL(
+        in directoryURL: URL,
+        baseName: String
+    ) -> URL
+
     func createEmptyFile(at fileURL: URL) throws
+
+    func createDirectory(at directoryURL: URL) throws
 }
 
-/// 系统文件创建器负责命名避让和安全写入空文件.
+/// 系统文件创建器负责命名避让, 并安全写入文件和目录.
 public final class SystemFileCreator: FileCreating {
     private let fileManager: FileManager
 
@@ -148,10 +176,36 @@ public final class SystemFileCreator: FileCreating {
         var index = 1
 
         while true {
-            let fileName = index == 1 ? baseName : "\(baseName) \(index)"
-            let candidateURL = directoryURL
-                .appendingPathComponent(fileName, isDirectory: false)
-                .appendingPathExtension(fileExtension)
+            let candidateURL = availableURL(
+                in: directoryURL,
+                baseName: baseName,
+                fileExtension: fileExtension,
+                index: index,
+                isDirectory: false
+            )
+
+            guard fileManager.fileExists(atPath: candidateURL.path) else {
+                return candidateURL
+            }
+
+            index += 1
+        }
+    }
+
+    public func availableDirectoryURL(
+        in directoryURL: URL,
+        baseName: String
+    ) -> URL {
+        var index = 1
+
+        while true {
+            let candidateURL = availableURL(
+                in: directoryURL,
+                baseName: baseName,
+                fileExtension: nil,
+                index: index,
+                isDirectory: true
+            )
 
             guard fileManager.fileExists(atPath: candidateURL.path) else {
                 return candidateURL
@@ -167,6 +221,36 @@ public final class SystemFileCreator: FileCreating {
         } catch {
             throw ActionExecutionError.fileCreationFailed(fileURL)
         }
+    }
+
+    public func createDirectory(at directoryURL: URL) throws {
+        do {
+            try fileManager.createDirectory(
+                at: directoryURL,
+                withIntermediateDirectories: false
+            )
+        } catch {
+            throw ActionExecutionError.directoryCreationFailed(directoryURL)
+        }
+    }
+
+    private func availableURL(
+        in directoryURL: URL,
+        baseName: String,
+        fileExtension: String?,
+        index: Int,
+        isDirectory: Bool
+    ) -> URL {
+        let fileName = index == 1 ? baseName : "\(baseName) \(index)"
+        let candidateURL = directoryURL
+            .appendingPathComponent(fileName, isDirectory: isDirectory)
+
+        if let fileExtension {
+            return candidateURL
+                .appendingPathExtension(fileExtension)
+        }
+
+        return candidateURL
     }
 }
 

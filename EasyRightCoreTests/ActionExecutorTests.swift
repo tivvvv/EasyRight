@@ -112,6 +112,54 @@ final class ActionExecutorTests: XCTestCase {
         XCTAssertEqual(fileCreator.createdFileURLs, [targetURL])
     }
 
+    func testCreateFolderRequestsAvailableNameInSelectedFileDirectory() throws {
+        let targetURL = URL(fileURLWithPath: "/Users/example/Documents/Untitled Folder")
+        let fileCreator = SpyFileCreator(nextAvailableDirectoryURL: targetURL)
+        let executor = ActionExecutor(
+            fileCreator: fileCreator,
+            pasteboardWriter: SpyPasteboardWriter()
+        )
+        let selectedURL = URL(fileURLWithPath: "/Users/example/Documents/Source.md")
+
+        let result = try executor.execute(
+            .createFolder,
+            context: makeContext(urls: [selectedURL])
+        )
+
+        XCTAssertEqual(
+            fileCreator.requestedDirectoryURLs.map { $0.standardizedFileURL.path },
+            [selectedURL.deletingLastPathComponent().standardizedFileURL.path]
+        )
+        XCTAssertEqual(fileCreator.requestedBaseNames, ["Untitled Folder"])
+        XCTAssertEqual(fileCreator.requestedFileExtensions, [])
+        XCTAssertEqual(fileCreator.createdDirectoryURLs, [targetURL])
+        XCTAssertEqual(result.message, "Created Untitled Folder.")
+    }
+
+    func testCreateFolderUsesSelectedDirectoryAsTargetDirectory() throws {
+        let selectedURL = URL(fileURLWithPath: "/Users/example/Documents", isDirectory: true)
+        let targetURL = selectedURL.appendingPathComponent(
+            "Untitled Folder",
+            isDirectory: true
+        )
+        let fileCreator = SpyFileCreator(nextAvailableDirectoryURL: targetURL)
+        let executor = ActionExecutor(
+            fileCreator: fileCreator,
+            pasteboardWriter: SpyPasteboardWriter()
+        )
+
+        _ = try executor.execute(
+            .createFolder,
+            context: makeContext(urls: [selectedURL])
+        )
+
+        XCTAssertEqual(
+            fileCreator.requestedDirectoryURLs.map { $0.standardizedFileURL.path },
+            [selectedURL.standardizedFileURL.path]
+        )
+        XCTAssertEqual(fileCreator.createdDirectoryURLs, [targetURL])
+    }
+
     func testUnavailableActionThrowsBeforeWriting() {
         let pasteboardWriter = SpyPasteboardWriter()
         let executor = ActionExecutor(
@@ -175,6 +223,30 @@ final class SystemFileCreatorTests: XCTestCase {
         XCTAssertEqual(fileURL.lastPathComponent, "Untitled 3.txt")
     }
 
+    func testAvailableDirectoryURLSkipsExistingNames() throws {
+        let fileManager = FileManager.default
+        let directoryURL = try makeTemporaryDirectory(fileManager: fileManager)
+        defer {
+            try? fileManager.removeItem(at: directoryURL)
+        }
+        try fileManager.createDirectory(
+            at: directoryURL.appendingPathComponent("Untitled Folder", isDirectory: true),
+            withIntermediateDirectories: false
+        )
+        try fileManager.createDirectory(
+            at: directoryURL.appendingPathComponent("Untitled Folder 2", isDirectory: true),
+            withIntermediateDirectories: false
+        )
+        let fileCreator = SystemFileCreator(fileManager: fileManager)
+
+        let folderURL = fileCreator.availableDirectoryURL(
+            in: directoryURL,
+            baseName: "Untitled Folder"
+        )
+
+        XCTAssertEqual(folderURL.lastPathComponent, "Untitled Folder 3")
+    }
+
     func testCreateEmptyFileCreatesFileWithoutOverwriting() throws {
         let fileManager = FileManager.default
         let directoryURL = try makeTemporaryDirectory(fileManager: fileManager)
@@ -195,10 +267,32 @@ final class SystemFileCreatorTests: XCTestCase {
             )
         }
     }
+
+    func testCreateDirectoryCreatesDirectoryWithoutOverwriting() throws {
+        let fileManager = FileManager.default
+        let directoryURL = try makeTemporaryDirectory(fileManager: fileManager)
+        defer {
+            try? fileManager.removeItem(at: directoryURL)
+        }
+        let folderURL = directoryURL.appendingPathComponent("Untitled Folder")
+        let fileCreator = SystemFileCreator(fileManager: fileManager)
+
+        try fileCreator.createDirectory(at: folderURL)
+
+        var isDirectory: ObjCBool = false
+        XCTAssertTrue(fileManager.fileExists(atPath: folderURL.path, isDirectory: &isDirectory))
+        XCTAssertTrue(isDirectory.boolValue)
+        XCTAssertThrowsError(try fileCreator.createDirectory(at: folderURL)) { error in
+            XCTAssertEqual(
+                error as? ActionExecutionError,
+                .directoryCreationFailed(folderURL)
+            )
+        }
+    }
 }
 
 final class ActionRegistryTests: XCTestCase {
-    func testStandardRegistryIncludesCreateTextFileForSingleSelection() {
+    func testStandardRegistryIncludesCreateActionsForSingleSelection() {
         let registry = ActionRegistry.standard
         let selectedURL = URL(fileURLWithPath: "/Users/example/Documents/Source.md")
 
@@ -210,9 +304,10 @@ final class ActionRegistryTests: XCTestCase {
         XCTAssertTrue(actionIDs.contains(.copyFileName))
         XCTAssertTrue(actionIDs.contains(.copyDirectoryPath))
         XCTAssertTrue(actionIDs.contains(.createTextFile))
+        XCTAssertTrue(actionIDs.contains(.createFolder))
     }
 
-    func testStandardRegistryHidesCreateTextFileForMultipleSelection() {
+    func testStandardRegistryHidesCreateActionsForMultipleSelection() {
         let registry = ActionRegistry.standard
         let firstURL = URL(fileURLWithPath: "/Users/example/Documents/Alpha.txt")
         let secondURL = URL(fileURLWithPath: "/Users/example/Documents/Beta.md")
@@ -225,6 +320,7 @@ final class ActionRegistryTests: XCTestCase {
         XCTAssertTrue(actionIDs.contains(.copyFileName))
         XCTAssertTrue(actionIDs.contains(.copyDirectoryPath))
         XCTAssertFalse(actionIDs.contains(.createTextFile))
+        XCTAssertFalse(actionIDs.contains(.createFolder))
     }
 }
 
@@ -245,11 +341,17 @@ private final class SpyFileCreator: FileCreating {
     private(set) var requestedDirectoryURLs: [URL] = []
     private(set) var requestedBaseNames: [String] = []
     private(set) var requestedFileExtensions: [String] = []
+    private(set) var createdDirectoryURLs: [URL] = []
     private(set) var createdFileURLs: [URL] = []
+    var nextAvailableDirectoryURL: URL
     var nextAvailableFileURL: URL
     var errorToThrow: Error?
 
-    init(nextAvailableFileURL: URL = URL(fileURLWithPath: "/Users/example/Untitled.txt")) {
+    init(
+        nextAvailableDirectoryURL: URL = URL(fileURLWithPath: "/Users/example/Untitled Folder"),
+        nextAvailableFileURL: URL = URL(fileURLWithPath: "/Users/example/Untitled.txt")
+    ) {
+        self.nextAvailableDirectoryURL = nextAvailableDirectoryURL
         self.nextAvailableFileURL = nextAvailableFileURL
     }
 
@@ -264,12 +366,29 @@ private final class SpyFileCreator: FileCreating {
         return nextAvailableFileURL
     }
 
+    func availableDirectoryURL(
+        in directoryURL: URL,
+        baseName: String
+    ) -> URL {
+        requestedDirectoryURLs.append(directoryURL)
+        requestedBaseNames.append(baseName)
+        return nextAvailableDirectoryURL
+    }
+
     func createEmptyFile(at fileURL: URL) throws {
         if let errorToThrow {
             throw errorToThrow
         }
 
         createdFileURLs.append(fileURL)
+    }
+
+    func createDirectory(at directoryURL: URL) throws {
+        if let errorToThrow {
+            throw errorToThrow
+        }
+
+        createdDirectoryURLs.append(directoryURL)
     }
 }
 
