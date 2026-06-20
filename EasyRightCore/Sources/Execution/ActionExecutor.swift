@@ -12,15 +12,18 @@ public final class ActionExecutor {
     ]
 
     private let fileCreator: FileCreating
+    private let itemNamePrompter: ItemNamePrompting
     private let pasteboardWriter: PasteboardWriting
     private let terminalOpener: TerminalOpening
 
     public init(
         fileCreator: FileCreating = SystemFileCreator(),
+        itemNamePrompter: ItemNamePrompting = SystemItemNamePrompter(),
         pasteboardWriter: PasteboardWriting = SystemPasteboardWriter(),
         terminalOpener: TerminalOpening = SystemTerminalOpener()
     ) {
         self.fileCreator = fileCreator
+        self.itemNamePrompter = itemNamePrompter
         self.pasteboardWriter = pasteboardWriter
         self.terminalOpener = terminalOpener
     }
@@ -83,10 +86,18 @@ public final class ActionExecutor {
     private func createTextFile(context: ActionExecutionContext) throws -> ActionExecutionResult {
         let selectedURL = try singleSelectedURL(context: context)
         let directoryURL = selectedURL.easyRightDirectoryURL
+        let fileName = try normalizedItemName(
+            itemNamePrompter.promptForItemName(
+                title: "Create Text File",
+                message: "Enter the new text file name.",
+                defaultName: "Untitled.txt"
+            )
+        )
+        let fileNameComponents = textFileNameComponents(from: fileName)
         let fileURL = fileCreator.availableFileURL(
             in: directoryURL,
-            baseName: "Untitled",
-            fileExtension: "txt"
+            baseName: fileNameComponents.baseName,
+            fileExtension: fileNameComponents.fileExtension
         )
 
         try fileCreator.createEmptyFile(at: fileURL)
@@ -97,9 +108,16 @@ public final class ActionExecutor {
     private func createFolder(context: ActionExecutionContext) throws -> ActionExecutionResult {
         let selectedURL = try singleSelectedURL(context: context)
         let directoryURL = selectedURL.easyRightDirectoryURL
+        let folderName = try normalizedItemName(
+            itemNamePrompter.promptForItemName(
+                title: "Create Folder",
+                message: "Enter the new folder name.",
+                defaultName: "Untitled Folder"
+            )
+        )
         let folderURL = fileCreator.availableDirectoryURL(
             in: directoryURL,
-            baseName: "Untitled Folder"
+            baseName: folderName
         )
 
         try fileCreator.createDirectory(at: folderURL)
@@ -118,6 +136,38 @@ public final class ActionExecutor {
 
         let noun = directoryURLs.count == 1 ? "directory" : "directories"
         return ActionExecutionResult(message: "Opened \(directoryURLs.count) \(noun) in Terminal.")
+    }
+
+    private func normalizedItemName(_ rawName: String) throws -> String {
+        let name = rawName.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !name.isEmpty,
+              name != ".",
+              name != "..",
+              !name.contains("/"),
+              !name.contains(":")
+        else {
+            throw ActionExecutionError.invalidItemName(rawName)
+        }
+
+        return name
+    }
+
+    private func textFileNameComponents(from name: String) -> (
+        baseName: String,
+        fileExtension: String
+    ) {
+        guard let dotIndex = name.lastIndex(of: "."),
+              dotIndex != name.startIndex,
+              dotIndex < name.index(before: name.endIndex)
+        else {
+            return (baseName: name, fileExtension: "txt")
+        }
+
+        return (
+            baseName: String(name[..<dotIndex]),
+            fileExtension: String(name[name.index(after: dotIndex)...])
+        )
     }
 
     private func singleSelectedURL(context: ActionExecutionContext) throws -> URL {

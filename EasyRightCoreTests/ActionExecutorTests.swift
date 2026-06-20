@@ -68,10 +68,12 @@ final class ActionExecutorTests: XCTestCase {
     }
 
     func testCreateTextFileRequestsAvailableNameInSelectedFileDirectory() throws {
-        let targetURL = URL(fileURLWithPath: "/Users/example/Documents/Untitled.txt")
+        let targetURL = URL(fileURLWithPath: "/Users/example/Documents/Project Notes.txt")
         let fileCreator = SpyFileCreator(nextAvailableFileURL: targetURL)
+        let itemNamePrompter = SpyItemNamePrompter(itemName: "Project Notes.txt")
         let executor = ActionExecutor(
             fileCreator: fileCreator,
+            itemNamePrompter: itemNamePrompter,
             pasteboardWriter: SpyPasteboardWriter()
         )
         let selectedURL = URL(fileURLWithPath: "/Users/example/Documents/Source.md")
@@ -85,18 +87,71 @@ final class ActionExecutorTests: XCTestCase {
             fileCreator.requestedDirectoryURLs.map { $0.standardizedFileURL.path },
             [selectedURL.deletingLastPathComponent().standardizedFileURL.path]
         )
-        XCTAssertEqual(fileCreator.requestedBaseNames, ["Untitled"])
+        XCTAssertEqual(
+            itemNamePrompter.promptRequests,
+            [
+                ItemNamePromptRequest(
+                    title: "Create Text File",
+                    message: "Enter the new text file name.",
+                    defaultName: "Untitled.txt"
+                ),
+            ]
+        )
+        XCTAssertEqual(fileCreator.requestedBaseNames, ["Project Notes"])
         XCTAssertEqual(fileCreator.requestedFileExtensions, ["txt"])
         XCTAssertEqual(fileCreator.createdFileURLs, [targetURL])
-        XCTAssertEqual(result.message, "Created Untitled.txt.")
+        XCTAssertEqual(result.message, "Created Project Notes.txt.")
+    }
+
+    func testCreateTextFileAddsDefaultExtensionWhenPromptNameHasNoExtension() throws {
+        let targetURL = URL(fileURLWithPath: "/Users/example/Documents/Project Notes.txt")
+        let fileCreator = SpyFileCreator(nextAvailableFileURL: targetURL)
+        let executor = ActionExecutor(
+            fileCreator: fileCreator,
+            itemNamePrompter: SpyItemNamePrompter(itemName: "Project Notes"),
+            pasteboardWriter: SpyPasteboardWriter()
+        )
+        let selectedURL = URL(fileURLWithPath: "/Users/example/Documents/Source.md")
+
+        let result = try executor.execute(
+            .createTextFile,
+            context: makeContext(urls: [selectedURL])
+        )
+
+        XCTAssertEqual(fileCreator.requestedBaseNames, ["Project Notes"])
+        XCTAssertEqual(fileCreator.requestedFileExtensions, ["txt"])
+        XCTAssertEqual(fileCreator.createdFileURLs, [targetURL])
+        XCTAssertEqual(result.message, "Created Project Notes.txt.")
+    }
+
+    func testCreateTextFileHandlesHiddenNameWithoutEmptyBaseName() throws {
+        let targetURL = URL(fileURLWithPath: "/Users/example/Documents/.env.txt")
+        let fileCreator = SpyFileCreator(nextAvailableFileURL: targetURL)
+        let executor = ActionExecutor(
+            fileCreator: fileCreator,
+            itemNamePrompter: SpyItemNamePrompter(itemName: ".env"),
+            pasteboardWriter: SpyPasteboardWriter()
+        )
+        let selectedURL = URL(fileURLWithPath: "/Users/example/Documents/Source.md")
+
+        let result = try executor.execute(
+            .createTextFile,
+            context: makeContext(urls: [selectedURL])
+        )
+
+        XCTAssertEqual(fileCreator.requestedBaseNames, [".env"])
+        XCTAssertEqual(fileCreator.requestedFileExtensions, ["txt"])
+        XCTAssertEqual(fileCreator.createdFileURLs, [targetURL])
+        XCTAssertEqual(result.message, "Created .env.txt.")
     }
 
     func testCreateTextFileUsesSelectedDirectoryAsTargetDirectory() throws {
         let selectedURL = URL(fileURLWithPath: "/Users/example/Documents", isDirectory: true)
-        let targetURL = selectedURL.appendingPathComponent("Untitled.txt", isDirectory: false)
+        let targetURL = selectedURL.appendingPathComponent("Project Notes.txt", isDirectory: false)
         let fileCreator = SpyFileCreator(nextAvailableFileURL: targetURL)
         let executor = ActionExecutor(
             fileCreator: fileCreator,
+            itemNamePrompter: SpyItemNamePrompter(itemName: "Project Notes.txt"),
             pasteboardWriter: SpyPasteboardWriter()
         )
 
@@ -113,10 +168,12 @@ final class ActionExecutorTests: XCTestCase {
     }
 
     func testCreateFolderRequestsAvailableNameInSelectedFileDirectory() throws {
-        let targetURL = URL(fileURLWithPath: "/Users/example/Documents/Untitled Folder")
+        let targetURL = URL(fileURLWithPath: "/Users/example/Documents/Reports")
         let fileCreator = SpyFileCreator(nextAvailableDirectoryURL: targetURL)
+        let itemNamePrompter = SpyItemNamePrompter(itemName: "Reports")
         let executor = ActionExecutor(
             fileCreator: fileCreator,
+            itemNamePrompter: itemNamePrompter,
             pasteboardWriter: SpyPasteboardWriter()
         )
         let selectedURL = URL(fileURLWithPath: "/Users/example/Documents/Source.md")
@@ -130,21 +187,32 @@ final class ActionExecutorTests: XCTestCase {
             fileCreator.requestedDirectoryURLs.map { $0.standardizedFileURL.path },
             [selectedURL.deletingLastPathComponent().standardizedFileURL.path]
         )
-        XCTAssertEqual(fileCreator.requestedBaseNames, ["Untitled Folder"])
+        XCTAssertEqual(
+            itemNamePrompter.promptRequests,
+            [
+                ItemNamePromptRequest(
+                    title: "Create Folder",
+                    message: "Enter the new folder name.",
+                    defaultName: "Untitled Folder"
+                ),
+            ]
+        )
+        XCTAssertEqual(fileCreator.requestedBaseNames, ["Reports"])
         XCTAssertEqual(fileCreator.requestedFileExtensions, [])
         XCTAssertEqual(fileCreator.createdDirectoryURLs, [targetURL])
-        XCTAssertEqual(result.message, "Created Untitled Folder.")
+        XCTAssertEqual(result.message, "Created Reports.")
     }
 
     func testCreateFolderUsesSelectedDirectoryAsTargetDirectory() throws {
         let selectedURL = URL(fileURLWithPath: "/Users/example/Documents", isDirectory: true)
         let targetURL = selectedURL.appendingPathComponent(
-            "Untitled Folder",
+            "Reports",
             isDirectory: true
         )
         let fileCreator = SpyFileCreator(nextAvailableDirectoryURL: targetURL)
         let executor = ActionExecutor(
             fileCreator: fileCreator,
+            itemNamePrompter: SpyItemNamePrompter(itemName: "Reports"),
             pasteboardWriter: SpyPasteboardWriter()
         )
 
@@ -158,6 +226,30 @@ final class ActionExecutorTests: XCTestCase {
             [selectedURL.standardizedFileURL.path]
         )
         XCTAssertEqual(fileCreator.createdDirectoryURLs, [targetURL])
+    }
+
+    func testCreateFolderRejectsInvalidPromptName() {
+        let fileCreator = SpyFileCreator()
+        let executor = ActionExecutor(
+            fileCreator: fileCreator,
+            itemNamePrompter: SpyItemNamePrompter(itemName: "bad/name"),
+            pasteboardWriter: SpyPasteboardWriter()
+        )
+        let selectedURL = URL(fileURLWithPath: "/Users/example/Documents", isDirectory: true)
+
+        XCTAssertThrowsError(
+            try executor.execute(
+                .createFolder,
+                context: makeContext(urls: [selectedURL])
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? ActionExecutionError,
+                .invalidItemName("bad/name")
+            )
+        }
+        XCTAssertEqual(fileCreator.requestedDirectoryURLs, [])
+        XCTAssertEqual(fileCreator.createdDirectoryURLs, [])
     }
 
     func testOpenTerminalHereOpensSelectedFileDirectory() throws {
@@ -411,6 +503,42 @@ private final class SpyPasteboardWriter: PasteboardWriting {
         }
 
         writtenStrings.append(value)
+    }
+}
+
+private struct ItemNamePromptRequest: Equatable {
+    let title: String
+    let message: String
+    let defaultName: String
+}
+
+private final class SpyItemNamePrompter: ItemNamePrompting {
+    private(set) var promptRequests: [ItemNamePromptRequest] = []
+    var itemName: String
+    var errorToThrow: Error?
+
+    init(itemName: String = "Untitled") {
+        self.itemName = itemName
+    }
+
+    func promptForItemName(
+        title: String,
+        message: String,
+        defaultName: String
+    ) throws -> String {
+        promptRequests.append(
+            ItemNamePromptRequest(
+                title: title,
+                message: message,
+                defaultName: defaultName
+            )
+        )
+
+        if let errorToThrow {
+            throw errorToThrow
+        }
+
+        return itemName
     }
 }
 

@@ -20,6 +20,7 @@
 		1D687A51FACD6E1CC0BD866F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9A5EDA48B7BE29C29688ACB7 /* Assets.xcassets */; };
 		85D3D4BA4F7E4621A5DD7156 /* ActionExecutionResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88FB38E6D302478BA2461324 /* ActionExecutionResult.swift */; };
 		8E73FF5D6CBF4893921EF10A /* PasteboardWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93DAAC2365A3498B99C7F681 /* PasteboardWriter.swift */; };
+		B9C67A4499EA4F34AD8646DA /* ItemNamePrompter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB72D8FD951B4BDE877FEFE4 /* ItemNamePrompter.swift */; };
 		A365C0C91E17647FC215940E /* FileSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D05FDFF6F28FAFB2B9E694B /* FileSelection.swift */; };
 		A46F5523C60BE733C9865EF0 /* RightClickActionDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C860ABD5B27720CEED566F4 /* RightClickActionDescriptor.swift */; };
 		A5320E18F5CA8C5CFEF8B74B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7A1EB172F52B23F8E446AF /* SettingsView.swift */; };
@@ -96,6 +97,7 @@
 		95B956828BAB304312AA7BE5 /* EasyRight.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EasyRight.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9A5EDA48B7BE29C29688ACB7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B22389D4DE1ABA8DE8269637 /* ActionIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionIdentifier.swift; sourceTree = "<group>"; };
+		DB72D8FD951B4BDE877FEFE4 /* ItemNamePrompter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemNamePrompter.swift; sourceTree = "<group>"; };
 		D28056BBB2CD40818B4762D1 /* ActionExecutorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionExecutorTests.swift; sourceTree = "<group>"; };
 		DCBFBCF5800CFD888A8FF264 /* EasyRightFinderExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = EasyRightFinderExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		E64EE4E2FC57FAD36F66B36D /* FinderSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinderSync.swift; sourceTree = "<group>"; };
@@ -166,6 +168,7 @@
 				62638DA653A8497BAC0F44E6 /* ActionExecutionError.swift */,
 				88FB38E6D302478BA2461324 /* ActionExecutionResult.swift */,
 				49878F015F21443AA19A3105 /* ActionExecutor.swift */,
+				DB72D8FD951B4BDE877FEFE4 /* ItemNamePrompter.swift */,
 				93DAAC2365A3498B99C7F681 /* PasteboardWriter.swift */,
 				2325E3CE46EC49E6B3E28F70 /* TerminalOpener.swift */,
 			);
@@ -405,6 +408,7 @@
 				5A0F6DFC7FED606A5DD4AE6F /* ActionIdentifier.swift in Sources */,
 				E36EA40300F0A69349263AA3 /* ActionRegistry.swift in Sources */,
 				A365C0C91E17647FC215940E /* FileSelection.swift in Sources */,
+				B9C67A4499EA4F34AD8646DA /* ItemNamePrompter.swift in Sources */,
 				8E73FF5D6CBF4893921EF10A /* PasteboardWriter.swift in Sources */,
 				35E682B3540640B6B850D69F /* TerminalOpener.swift in Sources */,
 				A46F5523C60BE733C9865EF0 /* RightClickActionDescriptor.swift in Sources */,
