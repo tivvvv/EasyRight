@@ -21,6 +21,20 @@
                ReferencedContainer = "container:EasyRight.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "FBDDA2C80682468A951FA0E7"
+               BuildableName = "EasyRightCoreTests.xctest"
+               BlueprintName = "EasyRightCoreTests"
+               ReferencedContainer = "container:EasyRight.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -29,6 +43,16 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "FBDDA2C80682468A951FA0E7"
+               BuildableName = "EasyRightCoreTests.xctest"
+               BlueprintName = "EasyRightCoreTests"
+               ReferencedContainer = "container:EasyRight.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
