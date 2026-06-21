@@ -40,7 +40,7 @@ public extension ActionExecutionError {
         case .fileCreationFailed:
             "Could not create the file."
         case .invalidFileExtension:
-            "Enter a valid file extension. Extensions cannot be empty or contain path separators."
+            "Enter a valid file extension. Extensions cannot contain path separators or empty dot parts."
         case .invalidItemName:
             "Enter a valid name. Names cannot be empty, '.', '..', or contain path separators."
         case let .invalidSelectionCount(expected, _):

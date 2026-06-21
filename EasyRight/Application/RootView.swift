@@ -32,49 +32,21 @@ struct RootView: View {
 
     var body: some View {
         NavigationSplitView {
-            VStack(spacing: 0) {
-                List(orderedActions, selection: $selectedActionID) { action in
-                    HStack(spacing: 10) {
-                        Label(action.title, systemImage: action.systemImageName)
-                            .opacity(preferences.isEnabled(action.id) ? 1 : 0.45)
-
-                        Spacer()
-
-                        if !preferences.isEnabled(action.id) {
-                            Image(systemName: "minus.circle")
-                                .foregroundStyle(.secondary)
-                                .accessibilityLabel("Disabled")
-                        }
-                    }
-                    .tag(action.id)
-                }
-
-                Divider()
-
-                VStack(alignment: .leading, spacing: 10) {
-                    Label(enabledActionSummary, systemImage: "checkmark.circle")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
-                    Label(finderScopeSummary, systemImage: "folder")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
-                    SettingsLink {
-                        Label("Settings", systemImage: "slider.horizontal.3")
-                    }
-                    .controlSize(.small)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(12)
-            }
-            .navigationTitle("EasyRight")
+            RootSidebar(
+                actions: orderedActions,
+                preferences: preferences,
+                enabledActionSummary: enabledActionSummary,
+                finderScopeSummary: finderScopeSummary,
+                storageDiagnostic: storageDiagnostic,
+                selectedActionID: $selectedActionID
+            )
         } detail: {
             ActionDetailView(
                 action: selectedAction,
                 isEnabled: selectedAction.map { preferences.isEnabled($0.id) } ?? false,
                 enabledActionSummary: enabledActionSummary,
-                finderScopeSummary: finderScopeSummary
+                finderScopeSummary: finderScopeSummary,
+                storageDiagnostic: storageDiagnostic
             )
         }
         .frame(minWidth: 760, minHeight: 460)
@@ -124,6 +96,10 @@ struct RootView: View {
         return "\(count) Finder scope \(noun)"
     }
 
+    private var storageDiagnostic: SharedSettingsStorageDiagnostic {
+        preferencesStore.storageDiagnostic
+    }
+
     private func refreshPreferences() {
         let nextPreferences = preferencesStore.preferences(for: actionRegistry)
         preferences = nextPreferences
@@ -142,11 +118,91 @@ struct RootView: View {
     }
 }
 
+private struct RootSidebar: View {
+    let actions: [RightClickActionDescriptor]
+    let preferences: ActionPreferences
+    let enabledActionSummary: String
+    let finderScopeSummary: String
+    let storageDiagnostic: SharedSettingsStorageDiagnostic
+
+    @Binding var selectedActionID: ActionIdentifier?
+
+    var body: some View {
+        VStack(spacing: 0) {
+            List(actions, selection: $selectedActionID) { action in
+                RootSidebarActionRow(
+                    action: action,
+                    isEnabled: preferences.isEnabled(action.id)
+                )
+                .tag(action.id)
+            }
+
+            Divider()
+
+            RootSidebarStatusFooter(
+                enabledActionSummary: enabledActionSummary,
+                finderScopeSummary: finderScopeSummary,
+                storageDiagnostic: storageDiagnostic
+            )
+        }
+        .navigationTitle("EasyRight")
+    }
+}
+
+private struct RootSidebarActionRow: View {
+    let action: RightClickActionDescriptor
+    let isEnabled: Bool
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Label(action.title, systemImage: action.systemImageName)
+                .opacity(isEnabled ? 1 : 0.45)
+
+            Spacer()
+
+            if !isEnabled {
+                Image(systemName: "minus.circle")
+                    .foregroundStyle(.secondary)
+                    .accessibilityLabel("Disabled")
+            }
+        }
+    }
+}
+
+private struct RootSidebarStatusFooter: View {
+    let enabledActionSummary: String
+    let finderScopeSummary: String
+    let storageDiagnostic: SharedSettingsStorageDiagnostic
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label(enabledActionSummary, systemImage: "checkmark.circle")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            Label(finderScopeSummary, systemImage: "folder")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            SharedStorageStatusLabel(diagnostic: storageDiagnostic)
+                .font(.caption)
+
+            SettingsLink {
+                Label("Settings", systemImage: "slider.horizontal.3")
+            }
+            .controlSize(.small)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+    }
+}
+
 private struct ActionDetailView: View {
     let action: RightClickActionDescriptor?
     let isEnabled: Bool
     let enabledActionSummary: String
     let finderScopeSummary: String
+    let storageDiagnostic: SharedSettingsStorageDiagnostic
 
     var body: some View {
         ScrollView {
@@ -212,6 +268,12 @@ private struct ActionDetailView: View {
                     title: "Scope",
                     value: finderScopeSummary,
                     systemImageName: "folder"
+                )
+
+                DetailRow(
+                    title: "Storage",
+                    value: storageDiagnostic.displayTitle,
+                    systemImageName: storageDiagnostic.systemImageName
                 )
 
                 DetailRow(
@@ -290,6 +352,16 @@ private extension SelectionRule {
             "Single item"
         case .directorySelection:
             "Directory"
+        case .singleFile:
+            "Single file"
+        case .singleDirectory:
+            "Single directory"
+        case .filesOnly:
+            "Files only"
+        case .directoriesOnly:
+            "Directories only"
+        case .multipleItems:
+            "Multiple items"
         }
     }
 }

@@ -95,6 +95,7 @@ public final class SystemItemNamePrompter: ItemNamePrompting {
     ) throws -> FileNamePromptResult {
         let baseNameField = makeTextField(defaultValue: defaultBaseName, width: 260)
         let fileExtensionField = makeTextField(defaultValue: defaultFileExtension, width: 120)
+        fileExtensionField.placeholderString = "Optional"
         let gridView = NSGridView(views: [
             [
                 NSTextField(labelWithString: "Name"),

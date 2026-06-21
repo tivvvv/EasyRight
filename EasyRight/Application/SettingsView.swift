@@ -29,116 +29,33 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
-            Section {
-                ForEach(orderedActions) { action in
-                    HStack(spacing: 12) {
-                        Toggle(isOn: binding(for: action.id)) {
-                            Label(action.title, systemImage: action.systemImageName)
-                                .opacity(isEnabled(action.id) ? 1 : 0.45)
-                        }
+            SharedStorageStatusSettingsSection(
+                diagnostic: storageDiagnostic
+            )
 
-                        Spacer()
+            ActionPreferencesSettingsSection(
+                actions: orderedActions,
+                summary: enabledActionSummary,
+                canResetDefaults: canResetDefaults,
+                binding: binding(for:),
+                isEnabled: isEnabled(_:),
+                canMove: canMove(_:direction:),
+                move: move(_:direction:),
+                resetDefaults: resetDefaults
+            )
 
-                        HStack(spacing: 4) {
-                            Button {
-                                move(action.id, direction: .up)
-                            } label: {
-                                Image(systemName: "chevron.up")
-                            }
-                            .accessibilityLabel("Move Up")
-                            .disabled(!canMove(action.id, direction: .up))
-
-                            Button {
-                                move(action.id, direction: .down)
-                            } label: {
-                                Image(systemName: "chevron.down")
-                            }
-                            .accessibilityLabel("Move Down")
-                            .disabled(!canMove(action.id, direction: .down))
-                        }
-                        .buttonStyle(.borderless)
-                        .controlSize(.small)
-                    }
-                }
-            } header: {
-                HStack {
-                    Text("Actions")
-
-                    Text(enabledActionSummary)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
-                    Spacer()
-
-                    Button {
-                        resetDefaults()
-                    } label: {
-                        Label("Reset Defaults", systemImage: "arrow.counterclockwise")
-                    }
-                    .disabled(!canResetDefaults)
-                    .buttonStyle(.borderless)
-                    .controlSize(.small)
-                }
-            }
-
-            Section {
-                ForEach(finderScopePreferences.directoryPaths, id: \.self) { directoryPath in
-                    HStack(spacing: 12) {
-                        Label {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(displayName(forDirectoryPath: directoryPath))
-
-                                Text(directoryPath)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(1)
-                                    .truncationMode(.middle)
-                            }
-                        } icon: {
-                            Image(systemName: "folder")
-                        }
-
-                        Spacer()
-
-                        Button {
-                            removeScopeDirectory(at: directoryPath)
-                        } label: {
-                            Image(systemName: "minus.circle")
-                        }
-                        .accessibilityLabel("Remove Folder")
-                        .disabled(!canRemoveScopeDirectory)
-                        .buttonStyle(.borderless)
-                    }
-                }
-
-                Button {
-                    addScopeDirectories()
-                } label: {
-                    Label("Add Folder", systemImage: "folder.badge.plus")
-                }
-            } header: {
-                HStack {
-                    Text("Finder Scope")
-
-                    Text(finderScopeSummary)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
-                    Spacer()
-
-                    Button {
-                        resetScopeDefaults()
-                    } label: {
-                        Label("Reset Scope", systemImage: "arrow.counterclockwise")
-                    }
-                    .disabled(!canResetScopeDefaults)
-                    .buttonStyle(.borderless)
-                    .controlSize(.small)
-                }
-            }
+            FinderScopeSettingsSection(
+                preferences: finderScopePreferences,
+                summary: finderScopeSummary,
+                canResetDefaults: canResetScopeDefaults,
+                canRemoveDirectory: canRemoveScopeDirectory,
+                addDirectories: addScopeDirectories,
+                removeDirectory: removeScopeDirectory(at:),
+                resetDefaults: resetScopeDefaults
+            )
         }
         .formStyle(.grouped)
-        .frame(width: 520, height: 560)
+        .frame(width: 520, height: 620)
         .padding(18)
         .onAppear {
             preferences = preferencesStore.preferences(for: actionRegistry)
@@ -162,6 +79,10 @@ struct SettingsView: View {
         let noun = count == 1 ? "folder" : "folders"
 
         return "\(count) \(noun)"
+    }
+
+    private var storageDiagnostic: SharedSettingsStorageDiagnostic {
+        preferencesStore.storageDiagnostic
     }
 
     private var defaultPreferences: ActionPreferences {
@@ -262,8 +183,211 @@ struct SettingsView: View {
         finderScopePreferences = nextPreferences
         finderScopePreferencesStore.save(finderScopePreferences)
     }
+}
 
-    private func displayName(forDirectoryPath directoryPath: String) -> String {
+private struct SharedStorageStatusSettingsSection: View {
+    let diagnostic: SharedSettingsStorageDiagnostic
+
+    var body: some View {
+        Section {
+            SharedStorageStatusDetail(diagnostic: diagnostic)
+        } header: {
+            Text("Storage")
+        }
+    }
+}
+
+private struct ActionPreferencesSettingsSection: View {
+    let actions: [RightClickActionDescriptor]
+    let summary: String
+    let canResetDefaults: Bool
+    let binding: (ActionIdentifier) -> Binding<Bool>
+    let isEnabled: (ActionIdentifier) -> Bool
+    let canMove: (ActionIdentifier, ActionMoveDirection) -> Bool
+    let move: (ActionIdentifier, ActionMoveDirection) -> Void
+    let resetDefaults: () -> Void
+
+    var body: some View {
+        Section {
+            ForEach(actions) { action in
+                ActionPreferenceRow(
+                    action: action,
+                    isEnabled: isEnabled(action.id),
+                    toggleBinding: binding(action.id),
+                    canMoveUp: canMove(action.id, .up),
+                    canMoveDown: canMove(action.id, .down),
+                    moveUp: {
+                        move(action.id, .up)
+                    },
+                    moveDown: {
+                        move(action.id, .down)
+                    }
+                )
+            }
+        } header: {
+            HStack {
+                Text("Actions")
+
+                Text(summary)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                Spacer()
+
+                Button {
+                    resetDefaults()
+                } label: {
+                    Label("Reset Defaults", systemImage: "arrow.counterclockwise")
+                }
+                .disabled(!canResetDefaults)
+                .buttonStyle(.borderless)
+                .controlSize(.small)
+            }
+        }
+    }
+}
+
+private struct ActionPreferenceRow: View {
+    let action: RightClickActionDescriptor
+    let isEnabled: Bool
+    let toggleBinding: Binding<Bool>
+    let canMoveUp: Bool
+    let canMoveDown: Bool
+    let moveUp: () -> Void
+    let moveDown: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Toggle(isOn: toggleBinding) {
+                Label(action.title, systemImage: action.systemImageName)
+                    .opacity(isEnabled ? 1 : 0.45)
+            }
+
+            Spacer()
+
+            ActionMoveButtons(
+                canMoveUp: canMoveUp,
+                canMoveDown: canMoveDown,
+                moveUp: moveUp,
+                moveDown: moveDown
+            )
+        }
+    }
+}
+
+private struct ActionMoveButtons: View {
+    let canMoveUp: Bool
+    let canMoveDown: Bool
+    let moveUp: () -> Void
+    let moveDown: () -> Void
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Button {
+                moveUp()
+            } label: {
+                Image(systemName: "chevron.up")
+            }
+            .accessibilityLabel("Move Up")
+            .disabled(!canMoveUp)
+
+            Button {
+                moveDown()
+            } label: {
+                Image(systemName: "chevron.down")
+            }
+            .accessibilityLabel("Move Down")
+            .disabled(!canMoveDown)
+        }
+        .buttonStyle(.borderless)
+        .controlSize(.small)
+    }
+}
+
+private struct FinderScopeSettingsSection: View {
+    let preferences: FinderScopePreferences
+    let summary: String
+    let canResetDefaults: Bool
+    let canRemoveDirectory: Bool
+    let addDirectories: () -> Void
+    let removeDirectory: (String) -> Void
+    let resetDefaults: () -> Void
+
+    var body: some View {
+        Section {
+            ForEach(preferences.directoryPaths, id: \.self) { directoryPath in
+                FinderScopeDirectoryRow(
+                    directoryPath: directoryPath,
+                    canRemove: canRemoveDirectory,
+                    remove: {
+                        removeDirectory(directoryPath)
+                    }
+                )
+            }
+
+            Button {
+                addDirectories()
+            } label: {
+                Label("Add Folder", systemImage: "folder.badge.plus")
+            }
+        } header: {
+            HStack {
+                Text("Finder Scope")
+
+                Text(summary)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                Spacer()
+
+                Button {
+                    resetDefaults()
+                } label: {
+                    Label("Reset Scope", systemImage: "arrow.counterclockwise")
+                }
+                .disabled(!canResetDefaults)
+                .buttonStyle(.borderless)
+                .controlSize(.small)
+            }
+        }
+    }
+}
+
+private struct FinderScopeDirectoryRow: View {
+    let directoryPath: String
+    let canRemove: Bool
+    let remove: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Label {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(displayName)
+
+                    Text(directoryPath)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
+            } icon: {
+                Image(systemName: "folder")
+            }
+
+            Spacer()
+
+            Button {
+                remove()
+            } label: {
+                Image(systemName: "minus.circle")
+            }
+            .accessibilityLabel("Remove Folder")
+            .disabled(!canRemove)
+            .buttonStyle(.borderless)
+        }
+    }
+
+    private var displayName: String {
         let url = URL(fileURLWithPath: directoryPath, isDirectory: true)
 
         return url.lastPathComponent.isEmpty ? directoryPath : url.lastPathComponent

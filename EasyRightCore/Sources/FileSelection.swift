@@ -16,17 +16,23 @@ public struct FileSelection: Hashable, Sendable {
         urls.count == 1
     }
 
+    public var isMultipleItems: Bool {
+        urls.count > 1
+    }
+
     public var containsDirectory: Bool {
         urls.contains { $0.easyRightIsDirectory }
+    }
+
+    public var containsFile: Bool {
+        urls.contains { !$0.easyRightIsDirectory }
     }
 
     public var containsOnlyDirectories: Bool {
         !urls.isEmpty && urls.allSatisfy { $0.easyRightIsDirectory }
     }
-}
 
-private extension URL {
-    var easyRightIsDirectory: Bool {
-        (try? resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? hasDirectoryPath
+    public var containsOnlyFiles: Bool {
+        !urls.isEmpty && urls.allSatisfy { !$0.easyRightIsDirectory }
     }
 }

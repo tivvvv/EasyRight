@@ -82,11 +82,15 @@ public final class FinderScopePreferencesStore: @unchecked Sendable {
         "FinderScopePreferencesStore.didChangeNotification"
     )
     public static let didChangeDarwinNotificationName = "com.tiv.EasyRight.finderScopePreferencesDidChange"
-    public static let shared = FinderScopePreferencesStore(
-        userDefaults: UserDefaults(
+    public static let shared: FinderScopePreferencesStore = {
+        let storage = SharedSettingsUserDefaults.make(
             suiteName: ActionPreferencesStore.appGroupIdentifier
-        ) ?? .standard
-    )
+        )
+        return FinderScopePreferencesStore(
+            userDefaults: storage.userDefaults,
+            storageDiagnostic: storage.diagnostic
+        )
+    }()
 
     private enum Key {
         static let directoryPaths = "finderScope.directoryPaths"
@@ -94,13 +98,19 @@ public final class FinderScopePreferencesStore: @unchecked Sendable {
 
     private let userDefaults: UserDefaults
     private let defaultDirectoryPath: String
+    public let storageDiagnostic: SharedSettingsStorageDiagnostic
 
     public init(
         userDefaults: UserDefaults,
-        defaultDirectoryPath: String = FinderScopePreferences.defaultDirectoryPath
+        defaultDirectoryPath: String = FinderScopePreferences.defaultDirectoryPath,
+        storageDiagnostic: SharedSettingsStorageDiagnostic = SharedSettingsStorageDiagnostic(
+            suiteName: ActionPreferencesStore.appGroupIdentifier,
+            location: .custom
+        )
     ) {
         self.userDefaults = userDefaults
         self.defaultDirectoryPath = defaultDirectoryPath
+        self.storageDiagnostic = storageDiagnostic
     }
 
     public var defaultPreferences: FinderScopePreferences {

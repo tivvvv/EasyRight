@@ -111,9 +111,13 @@ public final class ActionPreferencesStore: @unchecked Sendable {
     public static let didChangeNotification = Notification.Name(
         "ActionPreferencesStore.didChangeNotification"
     )
-    public static let shared = ActionPreferencesStore(
-        userDefaults: UserDefaults(suiteName: appGroupIdentifier) ?? .standard
-    )
+    public static let shared: ActionPreferencesStore = {
+        let storage = SharedSettingsUserDefaults.make(suiteName: appGroupIdentifier)
+        return ActionPreferencesStore(
+            userDefaults: storage.userDefaults,
+            storageDiagnostic: storage.diagnostic
+        )
+    }()
 
     private enum Key {
         static let orderedActionIDs = "actionPreferences.orderedActionIDs"
@@ -121,9 +125,17 @@ public final class ActionPreferencesStore: @unchecked Sendable {
     }
 
     private let userDefaults: UserDefaults
+    public let storageDiagnostic: SharedSettingsStorageDiagnostic
 
-    public init(userDefaults: UserDefaults) {
+    public init(
+        userDefaults: UserDefaults,
+        storageDiagnostic: SharedSettingsStorageDiagnostic = SharedSettingsStorageDiagnostic(
+            suiteName: appGroupIdentifier,
+            location: .custom
+        )
+    ) {
         self.userDefaults = userDefaults
+        self.storageDiagnostic = storageDiagnostic
     }
 
     public func preferences(for registry: ActionRegistry) -> ActionPreferences {

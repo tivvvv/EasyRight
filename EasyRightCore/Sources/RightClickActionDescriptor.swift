@@ -29,6 +29,11 @@ public enum SelectionRule: String, Hashable, Codable, Sendable {
     case nonEmptySelection
     case singleItem
     case directorySelection
+    case singleFile
+    case singleDirectory
+    case filesOnly
+    case directoriesOnly
+    case multipleItems
 
     public func allows(_ selection: FileSelection) -> Bool {
         switch self {
@@ -40,6 +45,16 @@ public enum SelectionRule: String, Hashable, Codable, Sendable {
             return selection.isSingleItem
         case .directorySelection:
             return selection.containsDirectory
+        case .singleFile:
+            return selection.isSingleItem && selection.containsOnlyFiles
+        case .singleDirectory:
+            return selection.isSingleItem && selection.containsOnlyDirectories
+        case .filesOnly:
+            return selection.containsOnlyFiles
+        case .directoriesOnly:
+            return selection.containsOnlyDirectories
+        case .multipleItems:
+            return selection.isMultipleItems
         }
     }
 }

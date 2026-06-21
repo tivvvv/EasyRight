@@ -68,6 +68,26 @@ final class FinderScopePreferencesTests: XCTestCase {
         XCTAssertEqual(storedPreferences.directoryPaths, preferences.directoryPaths)
     }
 
+    func testStoreExposesStorageDiagnostic() {
+        let suiteName = "EasyRightCoreTests.\(UUID().uuidString)"
+        let userDefaults = UserDefaults(suiteName: suiteName)!
+        defer {
+            userDefaults.removePersistentDomain(forName: suiteName)
+        }
+        let diagnostic = SharedSettingsStorageDiagnostic(
+            suiteName: suiteName,
+            location: .standardFallback
+        )
+        let store = FinderScopePreferencesStore(
+            userDefaults: userDefaults,
+            defaultDirectoryPath: "/Users/example",
+            storageDiagnostic: diagnostic
+        )
+
+        XCTAssertEqual(store.storageDiagnostic, diagnostic)
+        XCTAssertFalse(store.storageDiagnostic.usesAppGroup)
+    }
+
     func testStorePostsChangeNotificationWhenSavingScopePreferences() {
         let suiteName = "EasyRightCoreTests.\(UUID().uuidString)"
         let userDefaults = UserDefaults(suiteName: suiteName)!

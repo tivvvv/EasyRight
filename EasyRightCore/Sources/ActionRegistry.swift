@@ -1,6 +1,6 @@
 import Foundation
 
-/// 动作注册表是菜单定义的唯一入口, 后续设置页会基于这里做排序和开关.
+/// 动作注册表是菜单定义的唯一入口, 设置页和 Finder 菜单都会读取这里.
 public struct ActionRegistry: Sendable {
     public static let standard = ActionRegistry(actions: [
         .copyPath,

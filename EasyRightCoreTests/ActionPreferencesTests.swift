@@ -144,6 +144,25 @@ final class ActionPreferencesTests: XCTestCase {
         XCTAssertEqual(Set(storedPreferences.orderedActionIDs), Set(registry.actions.map(\.id)))
     }
 
+    func testStoreExposesStorageDiagnostic() {
+        let suiteName = "EasyRightCoreTests.\(UUID().uuidString)"
+        let userDefaults = UserDefaults(suiteName: suiteName)!
+        defer {
+            userDefaults.removePersistentDomain(forName: suiteName)
+        }
+        let diagnostic = SharedSettingsStorageDiagnostic(
+            suiteName: suiteName,
+            location: .appGroup
+        )
+        let store = ActionPreferencesStore(
+            userDefaults: userDefaults,
+            storageDiagnostic: diagnostic
+        )
+
+        XCTAssertEqual(store.storageDiagnostic, diagnostic)
+        XCTAssertTrue(store.storageDiagnostic.usesAppGroup)
+    }
+
     func testStorePostsChangeNotificationWhenSavingPreferences() {
         let registry = ActionRegistry.standard
         let suiteName = "EasyRightCoreTests.\(UUID().uuidString)"

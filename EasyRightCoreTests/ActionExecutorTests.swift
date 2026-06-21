@@ -95,7 +95,7 @@ final class ActionExecutorTests: XCTestCase {
             [
                 FileNamePromptRequest(
                     title: "Create File",
-                    message: "Enter the new file name and extension.",
+                    message: "Enter the new file name and optional extension.",
                     defaultBaseName: "Untitled",
                     defaultFileExtension: "txt"
                 ),
@@ -150,6 +150,30 @@ final class ActionExecutorTests: XCTestCase {
         XCTAssertEqual(fileCreator.requestedFileExtensions, ["md"])
         XCTAssertEqual(fileCreator.createdFileURLs, [targetURL])
         XCTAssertEqual(result.message, "Created Project Notes.md.")
+    }
+
+    func testCreateFileSupportsEmptyExtension() throws {
+        let targetURL = URL(fileURLWithPath: "/Users/example/Documents/Makefile")
+        let fileCreator = SpyFileCreator(nextAvailableFileURL: targetURL)
+        let executor = ActionExecutor(
+            fileCreator: fileCreator,
+            itemNamePrompter: SpyItemNamePrompter(
+                fileBaseName: "Makefile",
+                fileExtension: " "
+            ),
+            pasteboardWriter: SpyPasteboardWriter()
+        )
+        let selectedURL = URL(fileURLWithPath: "/Users/example/Documents/Source.md")
+
+        let result = try executor.execute(
+            .createFile,
+            context: makeContext(urls: [selectedURL])
+        )
+
+        XCTAssertEqual(fileCreator.requestedBaseNames, ["Makefile"])
+        XCTAssertEqual(fileCreator.requestedFileExtensions, [nil])
+        XCTAssertEqual(fileCreator.createdFileURLs, [targetURL])
+        XCTAssertEqual(result.message, "Created Makefile.")
     }
 
     func testCreateFileHandlesHiddenNameWithoutEmptyBaseName() throws {
@@ -605,7 +629,7 @@ final class ActionExecutionFeedbackTests: XCTestCase {
         XCTAssertFalse(error.shouldSuppressUserFeedback)
         XCTAssertEqual(
             error.userFeedbackMessage,
-            "Enter a valid file extension. Extensions cannot be empty or contain path separators."
+            "Enter a valid file extension. Extensions cannot contain path separators or empty dot parts."
         )
     }
 
@@ -666,6 +690,24 @@ final class SystemFileCreatorTests: XCTestCase {
         )
 
         XCTAssertEqual(fileURL.lastPathComponent, "Untitled 3.txt")
+    }
+
+    func testAvailableFileURLSupportsMissingExtension() throws {
+        let fileManager = FileManager.default
+        let directoryURL = try makeTemporaryDirectory(fileManager: fileManager)
+        defer {
+            try? fileManager.removeItem(at: directoryURL)
+        }
+        try Data().write(to: directoryURL.appendingPathComponent("Makefile"))
+        let fileCreator = SystemFileCreator(fileManager: fileManager)
+
+        let fileURL = fileCreator.availableFileURL(
+            in: directoryURL,
+            baseName: "Makefile",
+            fileExtension: nil
+        )
+
+        XCTAssertEqual(fileURL.lastPathComponent, "Makefile 2")
     }
 
     func testAvailableDirectoryURLSkipsExistingNames() throws {
@@ -781,6 +823,91 @@ final class ActionRegistryTests: XCTestCase {
     }
 }
 
+final class SelectionRuleTests: XCTestCase {
+    private let fileURL = URL(fileURLWithPath: "/Users/example/Documents/Note.txt")
+    private let secondFileURL = URL(fileURLWithPath: "/Users/example/Documents/Todo.md")
+    private let directoryURL = URL(
+        fileURLWithPath: "/Users/example/Documents",
+        isDirectory: true
+    )
+    private let secondDirectoryURL = URL(
+        fileURLWithPath: "/Users/example/Downloads",
+        isDirectory: true
+    )
+
+    func testSelectionRulesHandleEmptySelection() {
+        let selection = FileSelection(urls: [])
+
+        XCTAssertTrue(SelectionRule.anySelection.allows(selection))
+        XCTAssertFalse(SelectionRule.nonEmptySelection.allows(selection))
+        XCTAssertFalse(SelectionRule.singleItem.allows(selection))
+        XCTAssertFalse(SelectionRule.singleFile.allows(selection))
+        XCTAssertFalse(SelectionRule.singleDirectory.allows(selection))
+        XCTAssertFalse(SelectionRule.filesOnly.allows(selection))
+        XCTAssertFalse(SelectionRule.directoriesOnly.allows(selection))
+        XCTAssertFalse(SelectionRule.multipleItems.allows(selection))
+    }
+
+    func testSelectionRulesHandleSingleFile() {
+        let selection = FileSelection(urls: [fileURL])
+
+        XCTAssertTrue(SelectionRule.nonEmptySelection.allows(selection))
+        XCTAssertTrue(SelectionRule.singleItem.allows(selection))
+        XCTAssertTrue(SelectionRule.singleFile.allows(selection))
+        XCTAssertTrue(SelectionRule.filesOnly.allows(selection))
+        XCTAssertFalse(SelectionRule.directorySelection.allows(selection))
+        XCTAssertFalse(SelectionRule.singleDirectory.allows(selection))
+        XCTAssertFalse(SelectionRule.directoriesOnly.allows(selection))
+        XCTAssertFalse(SelectionRule.multipleItems.allows(selection))
+    }
+
+    func testSelectionRulesHandleSingleDirectory() {
+        let selection = FileSelection(urls: [directoryURL])
+
+        XCTAssertTrue(SelectionRule.nonEmptySelection.allows(selection))
+        XCTAssertTrue(SelectionRule.singleItem.allows(selection))
+        XCTAssertTrue(SelectionRule.directorySelection.allows(selection))
+        XCTAssertTrue(SelectionRule.singleDirectory.allows(selection))
+        XCTAssertTrue(SelectionRule.directoriesOnly.allows(selection))
+        XCTAssertFalse(SelectionRule.singleFile.allows(selection))
+        XCTAssertFalse(SelectionRule.filesOnly.allows(selection))
+        XCTAssertFalse(SelectionRule.multipleItems.allows(selection))
+    }
+
+    func testSelectionRulesHandleMultipleFiles() {
+        let selection = FileSelection(urls: [fileURL, secondFileURL])
+
+        XCTAssertTrue(SelectionRule.nonEmptySelection.allows(selection))
+        XCTAssertTrue(SelectionRule.filesOnly.allows(selection))
+        XCTAssertTrue(SelectionRule.multipleItems.allows(selection))
+        XCTAssertFalse(SelectionRule.singleItem.allows(selection))
+        XCTAssertFalse(SelectionRule.directorySelection.allows(selection))
+        XCTAssertFalse(SelectionRule.directoriesOnly.allows(selection))
+    }
+
+    func testSelectionRulesHandleMultipleDirectories() {
+        let selection = FileSelection(urls: [directoryURL, secondDirectoryURL])
+
+        XCTAssertTrue(SelectionRule.nonEmptySelection.allows(selection))
+        XCTAssertTrue(SelectionRule.directorySelection.allows(selection))
+        XCTAssertTrue(SelectionRule.directoriesOnly.allows(selection))
+        XCTAssertTrue(SelectionRule.multipleItems.allows(selection))
+        XCTAssertFalse(SelectionRule.singleItem.allows(selection))
+        XCTAssertFalse(SelectionRule.filesOnly.allows(selection))
+    }
+
+    func testSelectionRulesHandleMixedSelection() {
+        let selection = FileSelection(urls: [fileURL, directoryURL])
+
+        XCTAssertTrue(SelectionRule.nonEmptySelection.allows(selection))
+        XCTAssertTrue(SelectionRule.directorySelection.allows(selection))
+        XCTAssertTrue(SelectionRule.multipleItems.allows(selection))
+        XCTAssertFalse(SelectionRule.singleItem.allows(selection))
+        XCTAssertFalse(SelectionRule.filesOnly.allows(selection))
+        XCTAssertFalse(SelectionRule.directoriesOnly.allows(selection))
+    }
+}
+
 private final class SpyPasteboardWriter: PasteboardWriting {
     private(set) var writtenStrings: [String] = []
     var errorToThrow: Error?
@@ -872,7 +999,7 @@ private final class SpyItemNamePrompter: ItemNamePrompting {
 private final class SpyFileCreator: FileCreating {
     private(set) var requestedDirectoryURLs: [URL] = []
     private(set) var requestedBaseNames: [String] = []
-    private(set) var requestedFileExtensions: [String] = []
+    private(set) var requestedFileExtensions: [String?] = []
     private(set) var createdDirectoryURLs: [URL] = []
     private(set) var createdFileURLs: [URL] = []
     var nextAvailableDirectoryURL: URL
@@ -890,7 +1017,7 @@ private final class SpyFileCreator: FileCreating {
     func availableFileURL(
         in directoryURL: URL,
         baseName: String,
-        fileExtension: String
+        fileExtension: String?
     ) -> URL {
         requestedDirectoryURLs.append(directoryURL)
         requestedBaseNames.append(baseName)

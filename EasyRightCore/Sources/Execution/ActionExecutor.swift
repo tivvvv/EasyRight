@@ -100,7 +100,7 @@ public final class ActionExecutor {
         let directoryURL = selectedURL.easyRightDirectoryURL
         let fileName = try itemNamePrompter.promptForFileName(
             title: "Create File",
-            message: "Enter the new file name and extension.",
+            message: "Enter the new file name and optional extension.",
             defaultBaseName: "Untitled",
             defaultFileExtension: "txt"
         )
@@ -177,11 +177,15 @@ public final class ActionExecutor {
         return name
     }
 
-    private func normalizedFileExtension(_ rawFileExtension: String) throws -> String {
+    private func normalizedFileExtension(_ rawFileExtension: String) throws -> String? {
         var fileExtension = rawFileExtension.trimmingCharacters(in: .whitespacesAndNewlines)
 
         while fileExtension.first == "." {
             fileExtension.removeFirst()
+        }
+
+        guard !fileExtension.isEmpty else {
+            return nil
         }
 
         let extensionParts = fileExtension.split(
@@ -189,8 +193,7 @@ public final class ActionExecutor {
             omittingEmptySubsequences: false
         )
 
-        guard !fileExtension.isEmpty,
-              extensionParts.allSatisfy({ !$0.isEmpty }),
+        guard extensionParts.allSatisfy({ !$0.isEmpty }),
               !fileExtension.contains("/"),
               !fileExtension.contains(":")
         else {
@@ -273,7 +276,7 @@ public protocol FileCreating: AnyObject {
     func availableFileURL(
         in directoryURL: URL,
         baseName: String,
-        fileExtension: String
+        fileExtension: String?
     ) -> URL
 
     func availableDirectoryURL(
@@ -297,7 +300,7 @@ public final class SystemFileCreator: FileCreating {
     public func availableFileURL(
         in directoryURL: URL,
         baseName: String,
-        fileExtension: String
+        fileExtension: String?
     ) -> URL {
         var index = 1
 
@@ -371,25 +374,11 @@ public final class SystemFileCreator: FileCreating {
         let candidateURL = directoryURL
             .appendingPathComponent(fileName, isDirectory: isDirectory)
 
-        if let fileExtension {
+        if let fileExtension, !fileExtension.isEmpty {
             return candidateURL
                 .appendingPathExtension(fileExtension)
         }
 
         return candidateURL
-    }
-}
-
-private extension URL {
-    var easyRightDirectoryPath: String {
-        easyRightDirectoryURL.standardizedFileURL.path
-    }
-
-    var easyRightDirectoryURL: URL {
-        easyRightIsDirectory ? self : deletingLastPathComponent()
-    }
-
-    var easyRightIsDirectory: Bool {
-        (try? resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? hasDirectoryPath
     }
 }
