@@ -452,6 +452,60 @@ final class ActionExecutorTests: XCTestCase {
     }
 }
 
+final class ActionExecutionFeedbackTests: XCTestCase {
+    func testNameInputCancelledSuppressesUserFeedback() {
+        let error = ActionExecutionError.nameInputCancelled
+
+        XCTAssertTrue(error.shouldSuppressUserFeedback)
+        XCTAssertTrue(error.easyRightShouldSuppressUserFeedback)
+        XCTAssertEqual(error.userFeedbackMessage, "Action cancelled.")
+    }
+
+    func testInvalidItemNameHasUserFeedbackMessage() {
+        let error = ActionExecutionError.invalidItemName("bad/name")
+
+        XCTAssertFalse(error.shouldSuppressUserFeedback)
+        XCTAssertEqual(
+            error.userFeedbackMessage,
+            "Enter a valid name. Names cannot be empty, '.', '..', or contain path separators."
+        )
+    }
+
+    func testInvalidFileExtensionHasUserFeedbackMessage() {
+        let error = ActionExecutionError.invalidFileExtension("bad/name")
+
+        XCTAssertFalse(error.shouldSuppressUserFeedback)
+        XCTAssertEqual(
+            error.userFeedbackMessage,
+            "Enter a valid file extension. Extensions cannot be empty or contain path separators."
+        )
+    }
+
+    func testInvalidSelectionCountPluralizesUserFeedbackMessage() {
+        let singularError = ActionExecutionError.invalidSelectionCount(expected: 1, actual: 0)
+        let pluralError = ActionExecutionError.invalidSelectionCount(expected: 2, actual: 1)
+
+        XCTAssertEqual(
+            singularError.userFeedbackMessage,
+            "Select exactly 1 item and try again."
+        )
+        XCTAssertEqual(
+            pluralError.userFeedbackMessage,
+            "Select exactly 2 items and try again."
+        )
+    }
+
+    func testUnknownErrorUsesFallbackUserFeedbackMessage() {
+        let error = NSError(domain: "EasyRightTests", code: 1)
+
+        XCTAssertFalse(error.easyRightShouldSuppressUserFeedback)
+        XCTAssertEqual(
+            error.easyRightUserFeedbackMessage,
+            "The action could not be completed."
+        )
+    }
+}
+
 final class SystemFileCreatorTests: XCTestCase {
     func testAvailableFileURLSkipsExistingNames() throws {
         let fileManager = FileManager.default

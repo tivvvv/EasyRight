@@ -7,6 +7,7 @@ import EasyRightCore
 final class FinderSync: FIFinderSync {
     private let actionRegistry = ActionRegistry.standard
     private let actionExecutor = ActionExecutor()
+    private let feedbackPresenter: ActionFeedbackPresenting = SystemActionFeedbackPresenter()
     private let logger = Logger(subsystem: "com.tiv.EasyRight.FinderExtension", category: "FinderSync")
 
     override init() {
@@ -52,6 +53,7 @@ final class FinderSync: FIFinderSync {
     @objc private func handleAction(_ sender: NSMenuItem) {
         guard let rawActionID = sender.representedObject as? String else {
             logger.error("Missing action identifier.")
+            feedbackPresenter.presentFailure(message: "This action could not be identified.")
             return
         }
 
@@ -59,6 +61,7 @@ final class FinderSync: FIFinderSync {
 
         guard let action = actionRegistry.action(with: actionID) else {
             logger.error("Unknown action identifier: \(rawActionID, privacy: .public)")
+            feedbackPresenter.presentFailure(message: "This action is not supported yet.")
             return
         }
 
@@ -67,8 +70,16 @@ final class FinderSync: FIFinderSync {
         do {
             let result = try actionExecutor.execute(action, context: context)
             logger.info("EasyRight action completed: \(result.message, privacy: .public)")
+            feedbackPresenter.presentSuccess(message: result.message)
         } catch {
-            logger.error("EasyRight action failed: \(String(describing: error), privacy: .public)")
+            if error.easyRightShouldSuppressUserFeedback {
+                logger.info("EasyRight action cancelled.")
+                return
+            }
+
+            let message = error.easyRightUserFeedbackMessage
+            logger.error("EasyRight action failed: \(message, privacy: .public)")
+            feedbackPresenter.presentFailure(message: message)
         }
     }
 
