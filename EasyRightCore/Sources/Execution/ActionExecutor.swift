@@ -10,6 +10,7 @@ public final class ActionExecutor {
         .createFile,
         .openTerminalHere,
         .openWithCursor,
+        .openWithCode,
     ]
 
     private let fileCreator: FileCreating
@@ -17,19 +18,22 @@ public final class ActionExecutor {
     private let pasteboardWriter: PasteboardWriting
     private let terminalOpener: TerminalOpening
     private let cursorOpener: CursorOpening
+    private let codeOpener: CodeOpening
 
     public init(
         fileCreator: FileCreating = SystemFileCreator(),
         itemNamePrompter: ItemNamePrompting = SystemItemNamePrompter(),
         pasteboardWriter: PasteboardWriting = SystemPasteboardWriter(),
         terminalOpener: TerminalOpening = SystemTerminalOpener(),
-        cursorOpener: CursorOpening = SystemCursorOpener()
+        cursorOpener: CursorOpening = SystemCursorOpener(),
+        codeOpener: CodeOpening = SystemCodeOpener()
     ) {
         self.fileCreator = fileCreator
         self.itemNamePrompter = itemNamePrompter
         self.pasteboardWriter = pasteboardWriter
         self.terminalOpener = terminalOpener
         self.cursorOpener = cursorOpener
+        self.codeOpener = codeOpener
     }
 
     public func canExecute(_ action: RightClickActionDescriptor) -> Bool {
@@ -60,6 +64,8 @@ public final class ActionExecutor {
             return try openTerminalHere(context: context)
         case .openWithCursor:
             return try openWithCursor(context: context)
+        case .openWithCode:
+            return try openWithCode(context: context)
         default:
             throw ActionExecutionError.unsupportedAction(action.id)
         }
@@ -145,16 +151,15 @@ public final class ActionExecutor {
     }
 
     private func openWithCursor(context: ActionExecutionContext) throws -> ActionExecutionResult {
-        let itemURLs = context.selection.urls
-
-        guard !itemURLs.isEmpty else {
-            throw ActionExecutionError.emptySelection
+        try openSelectedItems(context: context, applicationName: "Cursor") { itemURLs in
+            try cursorOpener.openCursor(at: itemURLs)
         }
+    }
 
-        try cursorOpener.openCursor(at: itemURLs)
-
-        let noun = itemURLs.count == 1 ? "item" : "items"
-        return ActionExecutionResult(message: "Opened \(itemURLs.count) \(noun) in Cursor.")
+    private func openWithCode(context: ActionExecutionContext) throws -> ActionExecutionResult {
+        try openSelectedItems(context: context, applicationName: "VS Code") { itemURLs in
+            try codeOpener.openCode(at: itemURLs)
+        }
     }
 
     private func normalizedItemName(_ rawName: String) throws -> String {
@@ -208,6 +213,25 @@ public final class ActionExecutor {
         }
 
         return selectedURL
+    }
+
+    private func openSelectedItems(
+        context: ActionExecutionContext,
+        applicationName: String,
+        openItems: ([URL]) throws -> Void
+    ) throws -> ActionExecutionResult {
+        let itemURLs = context.selection.urls
+
+        guard !itemURLs.isEmpty else {
+            throw ActionExecutionError.emptySelection
+        }
+
+        try openItems(itemURLs)
+
+        let noun = itemURLs.count == 1 ? "item" : "items"
+        return ActionExecutionResult(
+            message: "Opened \(itemURLs.count) \(noun) in \(applicationName)."
+        )
     }
 
     private func copyValues(

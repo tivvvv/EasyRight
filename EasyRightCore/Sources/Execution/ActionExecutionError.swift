@@ -2,6 +2,7 @@ import Foundation
 
 /// 动作执行错误只描述可恢复场景, 便于后续映射到通知和日志.
 public enum ActionExecutionError: Error, Equatable, Sendable {
+    case codeApplicationNotFound
     case cursorApplicationNotFound
     case directoryCreationFailed(URL)
     case emptySelection
@@ -28,6 +29,8 @@ public extension ActionExecutionError {
 
     var userFeedbackMessage: String {
         switch self {
+        case .codeApplicationNotFound:
+            "VS Code could not be found."
         case .cursorApplicationNotFound:
             "Cursor could not be found."
         case .directoryCreationFailed:

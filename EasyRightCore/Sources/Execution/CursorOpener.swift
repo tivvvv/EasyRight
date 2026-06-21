@@ -8,42 +8,24 @@ public protocol CursorOpening: AnyObject {
 
 /// 系统 Cursor 打开器负责把文件和目录交给 Cursor.app 处理.
 public final class SystemCursorOpener: CursorOpening {
-    private let workspace: NSWorkspace
-    private let fileManager: FileManager
-    private let cursorBundleIdentifier = "com.todesktop.230313mzl4w4u92"
-    private let fallbackApplicationURLs: [URL]
+    private let applicationOpener: ApplicationItemOpening
+    private let openRequest = ApplicationItemOpenRequest(
+        bundleIdentifier: "com.todesktop.230313mzl4w4u92",
+        fallbackApplicationNames: ["Cursor.app"],
+        applicationNotFoundError: .cursorApplicationNotFound
+    )
 
     public init(
         workspace: NSWorkspace = .shared,
         fileManager: FileManager = .default
     ) {
-        self.workspace = workspace
-        self.fileManager = fileManager
-        self.fallbackApplicationURLs = [
-            URL(fileURLWithPath: "/Applications/Cursor.app", isDirectory: true),
-            fileManager.homeDirectoryForCurrentUser
-                .appendingPathComponent("Applications/Cursor.app", isDirectory: true),
-        ]
-    }
-
-    public func openCursor(at itemURLs: [URL]) throws {
-        guard let cursorURL = cursorApplicationURL else {
-            throw ActionExecutionError.cursorApplicationNotFound
-        }
-
-        let configuration = NSWorkspace.OpenConfiguration()
-        configuration.activates = true
-
-        workspace.open(
-            itemURLs,
-            withApplicationAt: cursorURL,
-            configuration: configuration,
-            completionHandler: nil
+        self.applicationOpener = SystemApplicationItemOpener(
+            workspace: workspace,
+            fileManager: fileManager
         )
     }
 
-    private var cursorApplicationURL: URL? {
-        workspace.urlForApplication(withBundleIdentifier: cursorBundleIdentifier)
-            ?? fallbackApplicationURLs.first { fileManager.fileExists(atPath: $0.path) }
+    public func openCursor(at itemURLs: [URL]) throws {
+        try applicationOpener.openItems(itemURLs, request: openRequest)
     }
 }

@@ -470,6 +470,67 @@ final class ActionExecutorTests: XCTestCase {
         XCTAssertEqual(cursorOpener.openedItemURLBatches, [])
     }
 
+    func testOpenWithCodeOpensSelectedItem() throws {
+        let codeOpener = SpyCodeOpener()
+        let executor = ActionExecutor(
+            fileCreator: SpyFileCreator(),
+            pasteboardWriter: SpyPasteboardWriter(),
+            codeOpener: codeOpener
+        )
+        let selectedURL = URL(fileURLWithPath: "/Users/example/Documents/Source.md")
+
+        let result = try executor.execute(
+            .openWithCode,
+            context: makeContext(urls: [selectedURL])
+        )
+
+        XCTAssertEqual(codeOpener.openedItemURLBatches, [[selectedURL]])
+        XCTAssertEqual(result.message, "Opened 1 item in VS Code.")
+    }
+
+    func testOpenWithCodeOpensSelectedItems() throws {
+        let codeOpener = SpyCodeOpener()
+        let executor = ActionExecutor(
+            fileCreator: SpyFileCreator(),
+            pasteboardWriter: SpyPasteboardWriter(),
+            codeOpener: codeOpener
+        )
+        let firstURL = URL(fileURLWithPath: "/Users/example/Documents/Source.md")
+        let secondURL = URL(fileURLWithPath: "/Users/example/Project", isDirectory: true)
+
+        let result = try executor.execute(
+            .openWithCode,
+            context: makeContext(urls: [firstURL, secondURL])
+        )
+
+        XCTAssertEqual(codeOpener.openedItemURLBatches, [[firstURL, secondURL]])
+        XCTAssertEqual(result.message, "Opened 2 items in VS Code.")
+    }
+
+    func testOpenWithCodeThrowsWhenCodeIsUnavailable() {
+        let codeOpener = SpyCodeOpener()
+        codeOpener.errorToThrow = ActionExecutionError.codeApplicationNotFound
+        let executor = ActionExecutor(
+            fileCreator: SpyFileCreator(),
+            pasteboardWriter: SpyPasteboardWriter(),
+            codeOpener: codeOpener
+        )
+        let selectedURL = URL(fileURLWithPath: "/Users/example/Documents/Source.md")
+
+        XCTAssertThrowsError(
+            try executor.execute(
+                .openWithCode,
+                context: makeContext(urls: [selectedURL])
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? ActionExecutionError,
+                .codeApplicationNotFound
+            )
+        }
+        XCTAssertEqual(codeOpener.openedItemURLBatches, [])
+    }
+
     func testUnavailableActionThrowsBeforeWriting() {
         let pasteboardWriter = SpyPasteboardWriter()
         let executor = ActionExecutor(
@@ -496,18 +557,24 @@ final class ActionExecutorTests: XCTestCase {
             fileCreator: SpyFileCreator(),
             pasteboardWriter: SpyPasteboardWriter()
         )
+        let unsupportedAction = RightClickActionDescriptor(
+            id: ActionIdentifier(rawValue: "unsupported_action"),
+            title: "Unsupported Action",
+            systemImageName: "questionmark",
+            selectionRule: .nonEmptySelection
+        )
         let selectedURL = URL(fileURLWithPath: "/Users/example/Documents")
 
-        XCTAssertFalse(executor.canExecute(.openWithCode))
+        XCTAssertFalse(executor.canExecute(unsupportedAction))
         XCTAssertThrowsError(
             try executor.execute(
-                .openWithCode,
+                unsupportedAction,
                 context: makeContext(urls: [selectedURL])
             )
         ) { error in
             XCTAssertEqual(
                 error as? ActionExecutionError,
-                .unsupportedAction(.openWithCode)
+                .unsupportedAction(unsupportedAction.id)
             )
         }
     }
@@ -540,6 +607,13 @@ final class ActionExecutionFeedbackTests: XCTestCase {
             error.userFeedbackMessage,
             "Enter a valid file extension. Extensions cannot be empty or contain path separators."
         )
+    }
+
+    func testCodeApplicationNotFoundHasUserFeedbackMessage() {
+        let error = ActionExecutionError.codeApplicationNotFound
+
+        XCTAssertFalse(error.shouldSuppressUserFeedback)
+        XCTAssertEqual(error.userFeedbackMessage, "VS Code could not be found.")
     }
 
     func testCursorApplicationNotFoundHasUserFeedbackMessage() {
@@ -678,6 +752,7 @@ final class ActionRegistryTests: XCTestCase {
         XCTAssertTrue(actionIDs.contains(.createFolder))
         XCTAssertTrue(actionIDs.contains(.openTerminalHere))
         XCTAssertTrue(actionIDs.contains(.openWithCursor))
+        XCTAssertTrue(actionIDs.contains(.openWithCode))
     }
 
     func testStandardRegistryHidesCreateActionsForMultipleSelection() {
@@ -696,6 +771,7 @@ final class ActionRegistryTests: XCTestCase {
         XCTAssertFalse(actionIDs.contains(.createFolder))
         XCTAssertTrue(actionIDs.contains(.openTerminalHere))
         XCTAssertTrue(actionIDs.contains(.openWithCursor))
+        XCTAssertTrue(actionIDs.contains(.openWithCode))
     }
 }
 
@@ -860,6 +936,19 @@ private final class SpyCursorOpener: CursorOpening {
     var errorToThrow: Error?
 
     func openCursor(at itemURLs: [URL]) throws {
+        if let errorToThrow {
+            throw errorToThrow
+        }
+
+        openedItemURLBatches.append(itemURLs)
+    }
+}
+
+private final class SpyCodeOpener: CodeOpening {
+    private(set) var openedItemURLBatches: [[URL]] = []
+    var errorToThrow: Error?
+
+    func openCode(at itemURLs: [URL]) throws {
         if let errorToThrow {
             throw errorToThrow
         }
