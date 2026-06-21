@@ -122,4 +122,28 @@ final class ActionPreferencesTests: XCTestCase {
         XCTAssertTrue(storedPreferences.disabledActionIDs.contains(.copyPath))
         XCTAssertEqual(Set(storedPreferences.orderedActionIDs), Set(registry.actions.map(\.id)))
     }
+
+    func testStoreResetsPreferencesToDefaults() {
+        let registry = ActionRegistry.standard
+        let suiteName = "EasyRightCoreTests.\(UUID().uuidString)"
+        let userDefaults = UserDefaults(suiteName: suiteName)!
+        defer {
+            userDefaults.removePersistentDomain(forName: suiteName)
+        }
+        let store = ActionPreferencesStore(userDefaults: userDefaults)
+        let customPreferences = ActionPreferences(
+            orderedActionIDs: [
+                .openWithCode,
+                .copyPath,
+            ],
+            disabledActionIDs: [.copyPath]
+        )
+
+        store.save(customPreferences, for: registry)
+        let resetPreferences = store.reset(for: registry)
+        let storedPreferences = store.preferences(for: registry)
+
+        XCTAssertEqual(resetPreferences, ActionPreferences.defaults(for: registry))
+        XCTAssertEqual(storedPreferences, ActionPreferences.defaults(for: registry))
+    }
 }

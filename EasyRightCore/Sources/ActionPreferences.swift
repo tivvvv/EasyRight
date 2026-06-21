@@ -144,4 +144,11 @@ public final class ActionPreferencesStore: @unchecked Sendable {
         )
         userDefaults.synchronize()
     }
+
+    @discardableResult
+    public func reset(for registry: ActionRegistry) -> ActionPreferences {
+        let defaultPreferences = ActionPreferences.defaults(for: registry)
+        save(defaultPreferences, for: registry)
+        return defaultPreferences
+    }
 }

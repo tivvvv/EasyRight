@@ -21,7 +21,7 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
-            Section("Actions") {
+            Section {
                 ForEach(orderedActions) { action in
                     HStack(spacing: 12) {
                         Toggle(isOn: binding(for: action.id)) {
@@ -51,6 +51,21 @@ struct SettingsView: View {
                         .controlSize(.small)
                     }
                 }
+            } header: {
+                HStack {
+                    Text("Actions")
+
+                    Spacer()
+
+                    Button {
+                        resetDefaults()
+                    } label: {
+                        Label("Reset Defaults", systemImage: "arrow.counterclockwise")
+                    }
+                    .disabled(!canResetDefaults)
+                    .buttonStyle(.borderless)
+                    .controlSize(.small)
+                }
             }
         }
         .formStyle(.grouped)
@@ -63,6 +78,14 @@ struct SettingsView: View {
 
     private var orderedActions: [RightClickActionDescriptor] {
         preferences.orderedActions(in: actionRegistry)
+    }
+
+    private var defaultPreferences: ActionPreferences {
+        ActionPreferences.defaults(for: actionRegistry)
+    }
+
+    private var canResetDefaults: Bool {
+        preferences.normalized(for: actionRegistry) != defaultPreferences
     }
 
     private func binding(for actionID: ActionIdentifier) -> Binding<Bool> {
@@ -82,6 +105,10 @@ struct SettingsView: View {
         var nextPreferences = preferences
         nextPreferences.moveAction(actionID, direction: direction, in: actionRegistry)
         updatePreferences(nextPreferences)
+    }
+
+    private func resetDefaults() {
+        preferences = preferencesStore.reset(for: actionRegistry)
     }
 
     private func canMove(
