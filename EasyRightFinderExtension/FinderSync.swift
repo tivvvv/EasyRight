@@ -8,19 +8,32 @@ final class FinderSync: FIFinderSync {
     private let actionMenuProvider = ActionMenuProvider.standard
     private let actionExecutor = ActionExecutor()
     private let preferencesStore = ActionPreferencesStore.shared
+    private let scopePreferencesStore = FinderScopePreferencesStore.shared
     private let feedbackPresenter: ActionFeedbackPresenting = SystemActionFeedbackPresenter()
     private let logger = Logger(subsystem: "com.tiv.EasyRight.FinderExtension", category: "FinderSync")
+    private var appliedDirectoryURLs = Set<URL>()
 
     override init() {
         super.init()
 
-        // 初始版本先监听用户主目录, 后续会通过设置页改成可配置的监听范围.
-        FIFinderSyncController.default().directoryURLs = [
-            URL(fileURLWithPath: NSHomeDirectory()),
-        ]
+        refreshDirectoryScope()
+        observeDirectoryScopeChanges()
+    }
+
+    deinit {
+        CFNotificationCenterRemoveObserver(
+            CFNotificationCenterGetDarwinNotifyCenter(),
+            Unmanaged.passUnretained(self).toOpaque(),
+            CFNotificationName(
+                FinderScopePreferencesStore.didChangeDarwinNotificationName as CFString
+            ),
+            nil
+        )
     }
 
     override func menu(for _: FIMenuKind) -> NSMenu? {
+        refreshDirectoryScope()
+
         let actionPreferences = preferencesStore.preferences(for: actionMenuProvider.registry)
         let availableActions = actionMenuProvider.actions(
             for: currentSelection,
@@ -89,5 +102,43 @@ final class FinderSync: FIFinderSync {
     private var currentSelection: FileSelection {
         let selectedURLs = FIFinderSyncController.default().selectedItemURLs() ?? []
         return FileSelection(urls: selectedURLs)
+    }
+
+    private func refreshDirectoryScope() {
+        let directoryURLs = Set(scopePreferencesStore.preferences().directoryURLs)
+        guard directoryURLs != appliedDirectoryURLs else {
+            return
+        }
+
+        appliedDirectoryURLs = directoryURLs
+        FIFinderSyncController.default().directoryURLs = directoryURLs
+        logger.info("Updated Finder scope with \(directoryURLs.count, privacy: .public) directories.")
+    }
+
+    private func observeDirectoryScopeChanges() {
+        CFNotificationCenterAddObserver(
+            CFNotificationCenterGetDarwinNotifyCenter(),
+            Unmanaged.passUnretained(self).toOpaque(),
+            { _, observer, _, _, _ in
+                guard let observer else {
+                    return
+                }
+
+                let observerAddress = UInt(bitPattern: observer)
+                DispatchQueue.main.async {
+                    guard let observer = UnsafeRawPointer(bitPattern: observerAddress) else {
+                        return
+                    }
+
+                    let finderSync = Unmanaged<FinderSync>
+                        .fromOpaque(observer)
+                        .takeUnretainedValue()
+                    finderSync.refreshDirectoryScope()
+                }
+            },
+            FinderScopePreferencesStore.didChangeDarwinNotificationName as CFString,
+            nil,
+            .deliverImmediately
+        )
     }
 }

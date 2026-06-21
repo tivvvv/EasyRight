@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 import EasyRightCore
@@ -5,17 +6,24 @@ import EasyRightCore
 struct SettingsView: View {
     let actionRegistry: ActionRegistry
     private let preferencesStore: ActionPreferencesStore
+    private let finderScopePreferencesStore: FinderScopePreferencesStore
 
     @State private var preferences: ActionPreferences
+    @State private var finderScopePreferences: FinderScopePreferences
 
     init(
         actionRegistry: ActionRegistry,
-        preferencesStore: ActionPreferencesStore = .shared
+        preferencesStore: ActionPreferencesStore = .shared,
+        finderScopePreferencesStore: FinderScopePreferencesStore = .shared
     ) {
         self.actionRegistry = actionRegistry
         self.preferencesStore = preferencesStore
+        self.finderScopePreferencesStore = finderScopePreferencesStore
         _preferences = State(
             initialValue: preferencesStore.preferences(for: actionRegistry)
+        )
+        _finderScopePreferences = State(
+            initialValue: finderScopePreferencesStore.preferences()
         )
     }
 
@@ -72,12 +80,69 @@ struct SettingsView: View {
                     .controlSize(.small)
                 }
             }
+
+            Section {
+                ForEach(finderScopePreferences.directoryPaths, id: \.self) { directoryPath in
+                    HStack(spacing: 12) {
+                        Label {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(displayName(forDirectoryPath: directoryPath))
+
+                                Text(directoryPath)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                                    .truncationMode(.middle)
+                            }
+                        } icon: {
+                            Image(systemName: "folder")
+                        }
+
+                        Spacer()
+
+                        Button {
+                            removeScopeDirectory(at: directoryPath)
+                        } label: {
+                            Image(systemName: "minus.circle")
+                        }
+                        .accessibilityLabel("Remove Folder")
+                        .disabled(!canRemoveScopeDirectory)
+                        .buttonStyle(.borderless)
+                    }
+                }
+
+                Button {
+                    addScopeDirectories()
+                } label: {
+                    Label("Add Folder", systemImage: "folder.badge.plus")
+                }
+            } header: {
+                HStack {
+                    Text("Finder Scope")
+
+                    Text(finderScopeSummary)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    Spacer()
+
+                    Button {
+                        resetScopeDefaults()
+                    } label: {
+                        Label("Reset Scope", systemImage: "arrow.counterclockwise")
+                    }
+                    .disabled(!canResetScopeDefaults)
+                    .buttonStyle(.borderless)
+                    .controlSize(.small)
+                }
+            }
         }
         .formStyle(.grouped)
-        .frame(width: 480, height: 360)
+        .frame(width: 520, height: 560)
         .padding(18)
         .onAppear {
             preferences = preferencesStore.preferences(for: actionRegistry)
+            finderScopePreferences = finderScopePreferencesStore.preferences()
         }
     }
 
@@ -92,12 +157,31 @@ struct SettingsView: View {
         return "\(enabledCount) of \(totalCount) enabled"
     }
 
+    private var finderScopeSummary: String {
+        let count = finderScopePreferences.directoryPaths.count
+        let noun = count == 1 ? "folder" : "folders"
+
+        return "\(count) \(noun)"
+    }
+
     private var defaultPreferences: ActionPreferences {
         ActionPreferences.defaults(for: actionRegistry)
     }
 
+    private var defaultFinderScopePreferences: FinderScopePreferences {
+        finderScopePreferencesStore.defaultPreferences
+    }
+
     private var canResetDefaults: Bool {
         preferences.normalized(for: actionRegistry) != defaultPreferences
+    }
+
+    private var canResetScopeDefaults: Bool {
+        finderScopePreferences != defaultFinderScopePreferences
+    }
+
+    private var canRemoveScopeDirectory: Bool {
+        finderScopePreferences.directoryPaths.count > 1
     }
 
     private func binding(for actionID: ActionIdentifier) -> Binding<Bool> {
@@ -127,6 +211,33 @@ struct SettingsView: View {
         preferences = preferencesStore.reset(for: actionRegistry)
     }
 
+    private func addScopeDirectories() {
+        let panel = NSOpenPanel()
+        panel.allowsMultipleSelection = true
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.canCreateDirectories = false
+        panel.prompt = "Add"
+
+        guard panel.runModal() == .OK else {
+            return
+        }
+
+        var nextPreferences = finderScopePreferences
+        panel.urls.forEach { nextPreferences.addDirectory(at: $0.path) }
+        updateFinderScopePreferences(nextPreferences)
+    }
+
+    private func removeScopeDirectory(at path: String) {
+        var nextPreferences = finderScopePreferences
+        nextPreferences.removeDirectory(at: path)
+        updateFinderScopePreferences(nextPreferences)
+    }
+
+    private func resetScopeDefaults() {
+        finderScopePreferences = finderScopePreferencesStore.reset()
+    }
+
     private func canMove(
         _ actionID: ActionIdentifier,
         direction: ActionMoveDirection
@@ -145,5 +256,16 @@ struct SettingsView: View {
     private func updatePreferences(_ nextPreferences: ActionPreferences) {
         preferences = nextPreferences.normalized(for: actionRegistry)
         preferencesStore.save(preferences, for: actionRegistry)
+    }
+
+    private func updateFinderScopePreferences(_ nextPreferences: FinderScopePreferences) {
+        finderScopePreferences = nextPreferences
+        finderScopePreferencesStore.save(finderScopePreferences)
+    }
+
+    private func displayName(forDirectoryPath directoryPath: String) -> String {
+        let url = URL(fileURLWithPath: directoryPath, isDirectory: true)
+
+        return url.lastPathComponent.isEmpty ? directoryPath : url.lastPathComponent
     }
 }

@@ -6,19 +6,25 @@ import EasyRightCore
 struct RootView: View {
     let actionRegistry: ActionRegistry
     private let preferencesStore: ActionPreferencesStore
+    private let finderScopePreferencesStore: FinderScopePreferencesStore
 
     @State private var preferences: ActionPreferences
+    @State private var finderScopePreferences: FinderScopePreferences
     @State private var selectedActionID: ActionIdentifier?
 
     init(
         actionRegistry: ActionRegistry,
-        preferencesStore: ActionPreferencesStore = .shared
+        preferencesStore: ActionPreferencesStore = .shared,
+        finderScopePreferencesStore: FinderScopePreferencesStore = .shared
     ) {
         self.actionRegistry = actionRegistry
         self.preferencesStore = preferencesStore
+        self.finderScopePreferencesStore = finderScopePreferencesStore
 
         let initialPreferences = preferencesStore.preferences(for: actionRegistry)
+        let initialFinderScopePreferences = finderScopePreferencesStore.preferences()
         _preferences = State(initialValue: initialPreferences)
+        _finderScopePreferences = State(initialValue: initialFinderScopePreferences)
         _selectedActionID = State(
             initialValue: initialPreferences.orderedActionIDs.first
         )
@@ -50,6 +56,10 @@ struct RootView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
+                    Label(finderScopeSummary, systemImage: "folder")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
                     SettingsLink {
                         Label("Settings", systemImage: "slider.horizontal.3")
                     }
@@ -63,17 +73,28 @@ struct RootView: View {
             ActionDetailView(
                 action: selectedAction,
                 isEnabled: selectedAction.map { preferences.isEnabled($0.id) } ?? false,
-                enabledActionSummary: enabledActionSummary
+                enabledActionSummary: enabledActionSummary,
+                finderScopeSummary: finderScopeSummary
             )
         }
         .frame(minWidth: 760, minHeight: 460)
-        .onAppear(perform: refreshPreferences)
+        .onAppear {
+            refreshPreferences()
+            refreshFinderScopePreferences()
+        }
         .onReceive(
             NotificationCenter.default.publisher(
                 for: ActionPreferencesStore.didChangeNotification
             )
         ) { _ in
             refreshPreferences()
+        }
+        .onReceive(
+            NotificationCenter.default.publisher(
+                for: FinderScopePreferencesStore.didChangeNotification
+            )
+        ) { _ in
+            refreshFinderScopePreferences()
         }
     }
 
@@ -96,6 +117,13 @@ struct RootView: View {
         return "\(enabledCount) of \(totalCount) enabled"
     }
 
+    private var finderScopeSummary: String {
+        let count = finderScopePreferences.directoryPaths.count
+        let noun = count == 1 ? "folder" : "folders"
+
+        return "\(count) Finder scope \(noun)"
+    }
+
     private func refreshPreferences() {
         let nextPreferences = preferencesStore.preferences(for: actionRegistry)
         preferences = nextPreferences
@@ -108,12 +136,17 @@ struct RootView: View {
             return
         }
     }
+
+    private func refreshFinderScopePreferences() {
+        finderScopePreferences = finderScopePreferencesStore.preferences()
+    }
 }
 
 private struct ActionDetailView: View {
     let action: RightClickActionDescriptor?
     let isEnabled: Bool
     let enabledActionSummary: String
+    let finderScopeSummary: String
 
     var body: some View {
         ScrollView {
@@ -173,6 +206,12 @@ private struct ActionDetailView: View {
                     title: "Selection",
                     value: action.selectionRule.displayTitle,
                     systemImageName: "filemenu.and.selection"
+                )
+
+                DetailRow(
+                    title: "Scope",
+                    value: finderScopeSummary,
+                    systemImageName: "folder"
                 )
 
                 DetailRow(
