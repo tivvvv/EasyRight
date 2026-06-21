@@ -99,6 +99,27 @@ final class ActionPreferencesTests: XCTestCase {
         )
     }
 
+    func testEnabledActionCountUsesNormalizedPreferences() {
+        let registry = ActionRegistry(actions: [
+            .copyPath,
+            .copyFileName,
+            .openWithTerminal,
+        ])
+        let unknownActionID = ActionIdentifier(rawValue: "missing_action")
+        let preferences = ActionPreferences(
+            orderedActionIDs: [
+                .copyPath,
+                unknownActionID,
+            ],
+            disabledActionIDs: [
+                .copyPath,
+                unknownActionID,
+            ]
+        )
+
+        XCTAssertEqual(preferences.enabledActionCount(in: registry), 2)
+    }
+
     func testStoreRoundTripsNormalizedPreferences() {
         let registry = ActionRegistry.standard
         let suiteName = "EasyRightCoreTests.\(UUID().uuidString)"

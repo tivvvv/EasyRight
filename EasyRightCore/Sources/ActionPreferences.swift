@@ -39,6 +39,14 @@ public struct ActionPreferences: Equatable, Sendable {
         !disabledActionIDs.contains(actionID)
     }
 
+    public func enabledActionCount(in registry: ActionRegistry) -> Int {
+        let normalizedPreferences = normalized(for: registry)
+
+        return normalizedPreferences.orderedActionIDs
+            .filter { normalizedPreferences.isEnabled($0) }
+            .count
+    }
+
     public mutating func setEnabled(_ isEnabled: Bool, for actionID: ActionIdentifier) {
         if isEnabled {
             disabledActionIDs.remove(actionID)

@@ -26,6 +26,7 @@ struct SettingsView: View {
                     HStack(spacing: 12) {
                         Toggle(isOn: binding(for: action.id)) {
                             Label(action.title, systemImage: action.systemImageName)
+                                .opacity(isEnabled(action.id) ? 1 : 0.45)
                         }
 
                         Spacer()
@@ -55,6 +56,10 @@ struct SettingsView: View {
                 HStack {
                     Text("Actions")
 
+                    Text(enabledActionSummary)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
                     Spacer()
 
                     Button {
@@ -80,6 +85,13 @@ struct SettingsView: View {
         preferences.orderedActions(in: actionRegistry)
     }
 
+    private var enabledActionSummary: String {
+        let enabledCount = preferences.enabledActionCount(in: actionRegistry)
+        let totalCount = preferences.normalized(for: actionRegistry).orderedActionIDs.count
+
+        return "\(enabledCount) of \(totalCount) enabled"
+    }
+
     private var defaultPreferences: ActionPreferences {
         ActionPreferences.defaults(for: actionRegistry)
     }
@@ -99,6 +111,10 @@ struct SettingsView: View {
                 updatePreferences(nextPreferences)
             }
         )
+    }
+
+    private func isEnabled(_ actionID: ActionIdentifier) -> Bool {
+        preferences.isEnabled(actionID)
     }
 
     private func move(_ actionID: ActionIdentifier, direction: ActionMoveDirection) {
