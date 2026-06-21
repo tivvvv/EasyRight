@@ -144,6 +144,37 @@ final class ActionPreferencesTests: XCTestCase {
         XCTAssertEqual(Set(storedPreferences.orderedActionIDs), Set(registry.actions.map(\.id)))
     }
 
+    func testStorePostsChangeNotificationWhenSavingPreferences() {
+        let registry = ActionRegistry.standard
+        let suiteName = "EasyRightCoreTests.\(UUID().uuidString)"
+        let userDefaults = UserDefaults(suiteName: suiteName)!
+        defer {
+            userDefaults.removePersistentDomain(forName: suiteName)
+        }
+        let store = ActionPreferencesStore(userDefaults: userDefaults)
+        let expectation = expectation(description: "Store posts change notification.")
+        let observer = NotificationCenter.default.addObserver(
+            forName: ActionPreferencesStore.didChangeNotification,
+            object: store,
+            queue: nil
+        ) { _ in
+            expectation.fulfill()
+        }
+        defer {
+            NotificationCenter.default.removeObserver(observer)
+        }
+
+        store.save(
+            ActionPreferences(
+                orderedActionIDs: [.copyPath],
+                disabledActionIDs: [.copyPath]
+            ),
+            for: registry
+        )
+
+        wait(for: [expectation], timeout: 1)
+    }
+
     func testStoreResetsPreferencesToDefaults() {
         let registry = ActionRegistry.standard
         let suiteName = "EasyRightCoreTests.\(UUID().uuidString)"

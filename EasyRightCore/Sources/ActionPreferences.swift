@@ -108,6 +108,9 @@ public enum ActionMoveDirection: Sendable {
 /// 动作偏好存储负责在主 App 和 Finder Extension 之间共享设置.
 public final class ActionPreferencesStore: @unchecked Sendable {
     public static let appGroupIdentifier = "group.com.tiv.EasyRight"
+    public static let didChangeNotification = Notification.Name(
+        "ActionPreferencesStore.didChangeNotification"
+    )
     public static let shared = ActionPreferencesStore(
         userDefaults: UserDefaults(suiteName: appGroupIdentifier) ?? .standard
     )
@@ -151,6 +154,10 @@ public final class ActionPreferencesStore: @unchecked Sendable {
             forKey: Key.disabledActionIDs
         )
         userDefaults.synchronize()
+        NotificationCenter.default.post(
+            name: Self.didChangeNotification,
+            object: self
+        )
     }
 
     @discardableResult
