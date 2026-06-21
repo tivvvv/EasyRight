@@ -2,6 +2,7 @@ import Foundation
 
 /// 动作执行错误只描述可恢复场景, 便于后续映射到通知和日志.
 public enum ActionExecutionError: Error, Equatable, Sendable {
+    case cursorApplicationNotFound
     case directoryCreationFailed(URL)
     case emptySelection
     case fileCreationFailed(URL)
@@ -27,6 +28,8 @@ public extension ActionExecutionError {
 
     var userFeedbackMessage: String {
         switch self {
+        case .cursorApplicationNotFound:
+            "Cursor could not be found."
         case .directoryCreationFailed:
             "Could not create the folder."
         case .emptySelection:

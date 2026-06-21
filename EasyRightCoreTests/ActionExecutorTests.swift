@@ -409,6 +409,67 @@ final class ActionExecutorTests: XCTestCase {
         XCTAssertEqual(result.message, "Opened 2 directories in Terminal.")
     }
 
+    func testOpenWithCursorOpensSelectedItem() throws {
+        let cursorOpener = SpyCursorOpener()
+        let executor = ActionExecutor(
+            fileCreator: SpyFileCreator(),
+            pasteboardWriter: SpyPasteboardWriter(),
+            cursorOpener: cursorOpener
+        )
+        let selectedURL = URL(fileURLWithPath: "/Users/example/Documents/Source.md")
+
+        let result = try executor.execute(
+            .openWithCursor,
+            context: makeContext(urls: [selectedURL])
+        )
+
+        XCTAssertEqual(cursorOpener.openedItemURLBatches, [[selectedURL]])
+        XCTAssertEqual(result.message, "Opened 1 item in Cursor.")
+    }
+
+    func testOpenWithCursorOpensSelectedItems() throws {
+        let cursorOpener = SpyCursorOpener()
+        let executor = ActionExecutor(
+            fileCreator: SpyFileCreator(),
+            pasteboardWriter: SpyPasteboardWriter(),
+            cursorOpener: cursorOpener
+        )
+        let firstURL = URL(fileURLWithPath: "/Users/example/Documents/Source.md")
+        let secondURL = URL(fileURLWithPath: "/Users/example/Project", isDirectory: true)
+
+        let result = try executor.execute(
+            .openWithCursor,
+            context: makeContext(urls: [firstURL, secondURL])
+        )
+
+        XCTAssertEqual(cursorOpener.openedItemURLBatches, [[firstURL, secondURL]])
+        XCTAssertEqual(result.message, "Opened 2 items in Cursor.")
+    }
+
+    func testOpenWithCursorThrowsWhenCursorIsUnavailable() {
+        let cursorOpener = SpyCursorOpener()
+        cursorOpener.errorToThrow = ActionExecutionError.cursorApplicationNotFound
+        let executor = ActionExecutor(
+            fileCreator: SpyFileCreator(),
+            pasteboardWriter: SpyPasteboardWriter(),
+            cursorOpener: cursorOpener
+        )
+        let selectedURL = URL(fileURLWithPath: "/Users/example/Documents/Source.md")
+
+        XCTAssertThrowsError(
+            try executor.execute(
+                .openWithCursor,
+                context: makeContext(urls: [selectedURL])
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? ActionExecutionError,
+                .cursorApplicationNotFound
+            )
+        }
+        XCTAssertEqual(cursorOpener.openedItemURLBatches, [])
+    }
+
     func testUnavailableActionThrowsBeforeWriting() {
         let pasteboardWriter = SpyPasteboardWriter()
         let executor = ActionExecutor(
@@ -479,6 +540,13 @@ final class ActionExecutionFeedbackTests: XCTestCase {
             error.userFeedbackMessage,
             "Enter a valid file extension. Extensions cannot be empty or contain path separators."
         )
+    }
+
+    func testCursorApplicationNotFoundHasUserFeedbackMessage() {
+        let error = ActionExecutionError.cursorApplicationNotFound
+
+        XCTAssertFalse(error.shouldSuppressUserFeedback)
+        XCTAssertEqual(error.userFeedbackMessage, "Cursor could not be found.")
     }
 
     func testInvalidSelectionCountPluralizesUserFeedbackMessage() {
@@ -609,6 +677,7 @@ final class ActionRegistryTests: XCTestCase {
         XCTAssertTrue(actionIDs.contains(.createFile))
         XCTAssertTrue(actionIDs.contains(.createFolder))
         XCTAssertTrue(actionIDs.contains(.openTerminalHere))
+        XCTAssertTrue(actionIDs.contains(.openWithCursor))
     }
 
     func testStandardRegistryHidesCreateActionsForMultipleSelection() {
@@ -626,6 +695,7 @@ final class ActionRegistryTests: XCTestCase {
         XCTAssertFalse(actionIDs.contains(.createFile))
         XCTAssertFalse(actionIDs.contains(.createFolder))
         XCTAssertTrue(actionIDs.contains(.openTerminalHere))
+        XCTAssertTrue(actionIDs.contains(.openWithCursor))
     }
 }
 
@@ -782,6 +852,19 @@ private final class SpyTerminalOpener: TerminalOpening {
         }
 
         openedDirectoryURLBatches.append(directoryURLs)
+    }
+}
+
+private final class SpyCursorOpener: CursorOpening {
+    private(set) var openedItemURLBatches: [[URL]] = []
+    var errorToThrow: Error?
+
+    func openCursor(at itemURLs: [URL]) throws {
+        if let errorToThrow {
+            throw errorToThrow
+        }
+
+        openedItemURLBatches.append(itemURLs)
     }
 }
 

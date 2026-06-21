@@ -9,23 +9,27 @@ public final class ActionExecutor {
         .createFolder,
         .createFile,
         .openTerminalHere,
+        .openWithCursor,
     ]
 
     private let fileCreator: FileCreating
     private let itemNamePrompter: ItemNamePrompting
     private let pasteboardWriter: PasteboardWriting
     private let terminalOpener: TerminalOpening
+    private let cursorOpener: CursorOpening
 
     public init(
         fileCreator: FileCreating = SystemFileCreator(),
         itemNamePrompter: ItemNamePrompting = SystemItemNamePrompter(),
         pasteboardWriter: PasteboardWriting = SystemPasteboardWriter(),
-        terminalOpener: TerminalOpening = SystemTerminalOpener()
+        terminalOpener: TerminalOpening = SystemTerminalOpener(),
+        cursorOpener: CursorOpening = SystemCursorOpener()
     ) {
         self.fileCreator = fileCreator
         self.itemNamePrompter = itemNamePrompter
         self.pasteboardWriter = pasteboardWriter
         self.terminalOpener = terminalOpener
+        self.cursorOpener = cursorOpener
     }
 
     public func canExecute(_ action: RightClickActionDescriptor) -> Bool {
@@ -54,6 +58,8 @@ public final class ActionExecutor {
             return try createFile(context: context)
         case .openTerminalHere:
             return try openTerminalHere(context: context)
+        case .openWithCursor:
+            return try openWithCursor(context: context)
         default:
             throw ActionExecutionError.unsupportedAction(action.id)
         }
@@ -136,6 +142,19 @@ public final class ActionExecutor {
 
         let noun = directoryURLs.count == 1 ? "directory" : "directories"
         return ActionExecutionResult(message: "Opened \(directoryURLs.count) \(noun) in Terminal.")
+    }
+
+    private func openWithCursor(context: ActionExecutionContext) throws -> ActionExecutionResult {
+        let itemURLs = context.selection.urls
+
+        guard !itemURLs.isEmpty else {
+            throw ActionExecutionError.emptySelection
+        }
+
+        try cursorOpener.openCursor(at: itemURLs)
+
+        let noun = itemURLs.count == 1 ? "item" : "items"
+        return ActionExecutionResult(message: "Opened \(itemURLs.count) \(noun) in Cursor.")
     }
 
     private func normalizedItemName(_ rawName: String) throws -> String {
