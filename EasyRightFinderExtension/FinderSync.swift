@@ -7,6 +7,7 @@ import EasyRightCore
 final class FinderSync: FIFinderSync {
     private let actionRegistry = ActionRegistry.standard
     private let actionExecutor = ActionExecutor()
+    private let preferencesStore = ActionPreferencesStore.shared
     private let feedbackPresenter: ActionFeedbackPresenting = SystemActionFeedbackPresenter()
     private let logger = Logger(subsystem: "com.tiv.EasyRight.FinderExtension", category: "FinderSync")
 
@@ -20,8 +21,9 @@ final class FinderSync: FIFinderSync {
     }
 
     override func menu(for _: FIMenuKind) -> NSMenu? {
-        let availableActions = actionRegistry
-            .availableActions(for: currentSelection)
+        let actionPreferences = preferencesStore.preferences(for: actionRegistry)
+        let availableActions = actionPreferences
+            .availableActions(for: currentSelection, in: actionRegistry)
             .filter(actionExecutor.canExecute)
 
         let rootMenu = NSMenu(title: "EasyRight")
