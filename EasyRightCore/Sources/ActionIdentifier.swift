@@ -15,7 +15,8 @@ public extension ActionIdentifier {
     static let copyDirectoryPath = ActionIdentifier(rawValue: "copy_directory_path")
     static let createFile = ActionIdentifier(rawValue: "create_file")
     static let createFolder = ActionIdentifier(rawValue: "create_folder")
-    static let openTerminalHere = ActionIdentifier(rawValue: "open_terminal_here")
+    static let openWithTerminal = ActionIdentifier(rawValue: "open_terminal_here")
+    static let openTerminalHere = openWithTerminal
     static let openWithCursor = ActionIdentifier(rawValue: "open_with_cursor")
     static let openWithCode = ActionIdentifier(rawValue: "open_with_code")
 }

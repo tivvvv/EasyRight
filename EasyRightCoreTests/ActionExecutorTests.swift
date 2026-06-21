@@ -334,7 +334,7 @@ final class ActionExecutorTests: XCTestCase {
         XCTAssertEqual(fileCreator.createdDirectoryURLs, [])
     }
 
-    func testOpenTerminalHereOpensSelectedFileDirectory() throws {
+    func testOpenWithTerminalOpensSelectedFileDirectory() throws {
         let terminalOpener = SpyTerminalOpener()
         let executor = ActionExecutor(
             fileCreator: SpyFileCreator(),
@@ -344,7 +344,7 @@ final class ActionExecutorTests: XCTestCase {
         let selectedURL = URL(fileURLWithPath: "/Users/example/Documents/Source.md")
 
         let result = try executor.execute(
-            .openTerminalHere,
+            .openWithTerminal,
             context: makeContext(urls: [selectedURL])
         )
 
@@ -357,7 +357,7 @@ final class ActionExecutorTests: XCTestCase {
         XCTAssertEqual(result.message, "Opened 1 directory in Terminal.")
     }
 
-    func testOpenTerminalHereOpensSelectedDirectory() throws {
+    func testOpenWithTerminalOpensSelectedDirectory() throws {
         let terminalOpener = SpyTerminalOpener()
         let executor = ActionExecutor(
             fileCreator: SpyFileCreator(),
@@ -367,7 +367,7 @@ final class ActionExecutorTests: XCTestCase {
         let selectedURL = URL(fileURLWithPath: "/Users/example/Documents", isDirectory: true)
 
         let result = try executor.execute(
-            .openTerminalHere,
+            .openWithTerminal,
             context: makeContext(urls: [selectedURL])
         )
 
@@ -380,7 +380,7 @@ final class ActionExecutorTests: XCTestCase {
         XCTAssertEqual(result.message, "Opened 1 directory in Terminal.")
     }
 
-    func testOpenTerminalHereOpensUniqueDirectories() throws {
+    func testOpenWithTerminalOpensUniqueDirectories() throws {
         let terminalOpener = SpyTerminalOpener()
         let executor = ActionExecutor(
             fileCreator: SpyFileCreator(),
@@ -396,7 +396,7 @@ final class ActionExecutorTests: XCTestCase {
         ]
 
         let result = try executor.execute(
-            .openTerminalHere,
+            .openWithTerminal,
             context: makeContext(urls: [firstURL, secondURL, thirdURL])
         )
 
@@ -750,7 +750,7 @@ final class ActionRegistryTests: XCTestCase {
         XCTAssertTrue(actionIDs.contains(.copyDirectoryPath))
         XCTAssertTrue(actionIDs.contains(.createFile))
         XCTAssertTrue(actionIDs.contains(.createFolder))
-        XCTAssertTrue(actionIDs.contains(.openTerminalHere))
+        XCTAssertTrue(actionIDs.contains(.openWithTerminal))
         XCTAssertTrue(actionIDs.contains(.openWithCursor))
         XCTAssertTrue(actionIDs.contains(.openWithCode))
     }
@@ -769,9 +769,15 @@ final class ActionRegistryTests: XCTestCase {
         XCTAssertTrue(actionIDs.contains(.copyDirectoryPath))
         XCTAssertFalse(actionIDs.contains(.createFile))
         XCTAssertFalse(actionIDs.contains(.createFolder))
-        XCTAssertTrue(actionIDs.contains(.openTerminalHere))
+        XCTAssertTrue(actionIDs.contains(.openWithTerminal))
         XCTAssertTrue(actionIDs.contains(.openWithCursor))
         XCTAssertTrue(actionIDs.contains(.openWithCode))
+    }
+
+    func testOpenWithTerminalKeepsExistingIdentifier() {
+        XCTAssertEqual(ActionIdentifier.openWithTerminal.rawValue, "open_terminal_here")
+        XCTAssertEqual(ActionIdentifier.openTerminalHere, .openWithTerminal)
+        XCTAssertEqual(RightClickActionDescriptor.openTerminalHere, .openWithTerminal)
     }
 }
 

@@ -8,7 +8,7 @@ public struct ActionRegistry: Sendable {
         .copyDirectoryPath,
         .createFile,
         .createFolder,
-        .openTerminalHere,
+        .openWithTerminal,
         .openWithCursor,
         .openWithCode,
     ])
@@ -64,12 +64,14 @@ public extension RightClickActionDescriptor {
         selectionRule: .singleItem
     )
 
-    static let openTerminalHere = RightClickActionDescriptor(
-        id: .openTerminalHere,
-        title: "Open Terminal Here",
+    static let openWithTerminal = RightClickActionDescriptor(
+        id: .openWithTerminal,
+        title: "Open With Terminal",
         systemImageName: "terminal",
         selectionRule: .nonEmptySelection
     )
+
+    static let openTerminalHere = openWithTerminal
 
     static let openWithCursor = RightClickActionDescriptor(
         id: .openWithCursor,

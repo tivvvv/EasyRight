@@ -8,7 +8,7 @@ public final class ActionExecutor {
         .copyPath,
         .createFolder,
         .createFile,
-        .openTerminalHere,
+        .openWithTerminal,
         .openWithCursor,
         .openWithCode,
     ]
@@ -60,8 +60,8 @@ public final class ActionExecutor {
             return try createFolder(context: context)
         case .createFile:
             return try createFile(context: context)
-        case .openTerminalHere:
-            return try openTerminalHere(context: context)
+        case .openWithTerminal:
+            return try openWithTerminal(context: context)
         case .openWithCursor:
             return try openWithCursor(context: context)
         case .openWithCode:
@@ -137,7 +137,7 @@ public final class ActionExecutor {
         return ActionExecutionResult(message: "Created \(folderURL.lastPathComponent).")
     }
 
-    private func openTerminalHere(context: ActionExecutionContext) throws -> ActionExecutionResult {
+    private func openWithTerminal(context: ActionExecutionContext) throws -> ActionExecutionResult {
         let directoryURLs = uniqueURLs(context.selection.urls.map(\.easyRightDirectoryURL))
 
         guard !directoryURLs.isEmpty else {
