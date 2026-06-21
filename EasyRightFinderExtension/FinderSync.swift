@@ -5,7 +5,7 @@ import OSLog
 import EasyRightCore
 
 final class FinderSync: FIFinderSync {
-    private let actionRegistry = ActionRegistry.standard
+    private let actionMenuProvider = ActionMenuProvider.standard
     private let actionExecutor = ActionExecutor()
     private let preferencesStore = ActionPreferencesStore.shared
     private let feedbackPresenter: ActionFeedbackPresenting = SystemActionFeedbackPresenter()
@@ -21,10 +21,11 @@ final class FinderSync: FIFinderSync {
     }
 
     override func menu(for _: FIMenuKind) -> NSMenu? {
-        let actionPreferences = preferencesStore.preferences(for: actionRegistry)
-        let availableActions = actionPreferences
-            .availableActions(for: currentSelection, in: actionRegistry)
-            .filter(actionExecutor.canExecute)
+        let actionPreferences = preferencesStore.preferences(for: actionMenuProvider.registry)
+        let availableActions = actionMenuProvider.actions(
+            for: currentSelection,
+            preferences: actionPreferences
+        )
 
         let rootMenu = NSMenu(title: "EasyRight")
         let rootItem = NSMenuItem(title: "EasyRight", action: nil, keyEquivalent: "")
@@ -61,7 +62,7 @@ final class FinderSync: FIFinderSync {
 
         let actionID = ActionIdentifier(rawValue: rawActionID)
 
-        guard let action = actionRegistry.action(with: actionID) else {
+        guard let action = actionMenuProvider.registry.action(with: actionID) else {
             logger.error("Unknown action identifier: \(rawActionID, privacy: .public)")
             feedbackPresenter.presentFailure(message: "This action is not supported yet.")
             return
