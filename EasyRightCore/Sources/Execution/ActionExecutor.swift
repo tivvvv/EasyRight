@@ -7,7 +7,7 @@ public final class ActionExecutor {
         .copyFileName,
         .copyPath,
         .createFolder,
-        .createTextFile,
+        .createFile,
         .openTerminalHere,
     ]
 
@@ -50,8 +50,8 @@ public final class ActionExecutor {
             return try copyPath(context: context)
         case .createFolder:
             return try createFolder(context: context)
-        case .createTextFile:
-            return try createTextFile(context: context)
+        case .createFile:
+            return try createFile(context: context)
         case .openTerminalHere:
             return try openTerminalHere(context: context)
         default:
@@ -83,7 +83,7 @@ public final class ActionExecutor {
         )
     }
 
-    private func createTextFile(context: ActionExecutionContext) throws -> ActionExecutionResult {
+    private func createFile(context: ActionExecutionContext) throws -> ActionExecutionResult {
         let selectedURL = try singleSelectedURL(context: context)
         let directoryURL = selectedURL.easyRightDirectoryURL
         let fileName = try itemNamePrompter.promptForFileName(

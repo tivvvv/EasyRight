@@ -67,7 +67,7 @@ final class ActionExecutorTests: XCTestCase {
         XCTAssertEqual(result.message, "Copied 2 directory paths.")
     }
 
-    func testCreateTextFileRequestsAvailableNameInSelectedFileDirectory() throws {
+    func testCreateFileRequestsAvailableNameInSelectedFileDirectory() throws {
         let targetURL = URL(fileURLWithPath: "/Users/example/Documents/Project Notes.txt")
         let fileCreator = SpyFileCreator(nextAvailableFileURL: targetURL)
         let itemNamePrompter = SpyItemNamePrompter(
@@ -82,7 +82,7 @@ final class ActionExecutorTests: XCTestCase {
         let selectedURL = URL(fileURLWithPath: "/Users/example/Documents/Source.md")
 
         let result = try executor.execute(
-            .createTextFile,
+            .createFile,
             context: makeContext(urls: [selectedURL])
         )
 
@@ -107,7 +107,7 @@ final class ActionExecutorTests: XCTestCase {
         XCTAssertEqual(result.message, "Created Project Notes.txt.")
     }
 
-    func testCreateTextFileUsesDefaultExtensionFromPrompt() throws {
+    func testCreateFileUsesDefaultExtensionFromPrompt() throws {
         let targetURL = URL(fileURLWithPath: "/Users/example/Documents/Project Notes.txt")
         let fileCreator = SpyFileCreator(nextAvailableFileURL: targetURL)
         let executor = ActionExecutor(
@@ -118,7 +118,7 @@ final class ActionExecutorTests: XCTestCase {
         let selectedURL = URL(fileURLWithPath: "/Users/example/Documents/Source.md")
 
         let result = try executor.execute(
-            .createTextFile,
+            .createFile,
             context: makeContext(urls: [selectedURL])
         )
 
@@ -128,7 +128,7 @@ final class ActionExecutorTests: XCTestCase {
         XCTAssertEqual(result.message, "Created Project Notes.txt.")
     }
 
-    func testCreateTextFileSupportsCustomExtension() throws {
+    func testCreateFileSupportsCustomExtension() throws {
         let targetURL = URL(fileURLWithPath: "/Users/example/Documents/Project Notes.md")
         let fileCreator = SpyFileCreator(nextAvailableFileURL: targetURL)
         let executor = ActionExecutor(
@@ -142,7 +142,7 @@ final class ActionExecutorTests: XCTestCase {
         let selectedURL = URL(fileURLWithPath: "/Users/example/Documents/Source.md")
 
         let result = try executor.execute(
-            .createTextFile,
+            .createFile,
             context: makeContext(urls: [selectedURL])
         )
 
@@ -152,7 +152,7 @@ final class ActionExecutorTests: XCTestCase {
         XCTAssertEqual(result.message, "Created Project Notes.md.")
     }
 
-    func testCreateTextFileHandlesHiddenNameWithoutEmptyBaseName() throws {
+    func testCreateFileHandlesHiddenNameWithoutEmptyBaseName() throws {
         let targetURL = URL(fileURLWithPath: "/Users/example/Documents/.env.txt")
         let fileCreator = SpyFileCreator(nextAvailableFileURL: targetURL)
         let executor = ActionExecutor(
@@ -163,7 +163,7 @@ final class ActionExecutorTests: XCTestCase {
         let selectedURL = URL(fileURLWithPath: "/Users/example/Documents/Source.md")
 
         let result = try executor.execute(
-            .createTextFile,
+            .createFile,
             context: makeContext(urls: [selectedURL])
         )
 
@@ -173,7 +173,7 @@ final class ActionExecutorTests: XCTestCase {
         XCTAssertEqual(result.message, "Created .env.txt.")
     }
 
-    func testCreateTextFileUsesSelectedDirectoryAsTargetDirectory() throws {
+    func testCreateFileUsesSelectedDirectoryAsTargetDirectory() throws {
         let selectedURL = URL(fileURLWithPath: "/Users/example/Documents", isDirectory: true)
         let targetURL = selectedURL.appendingPathComponent("Project Notes.txt", isDirectory: false)
         let fileCreator = SpyFileCreator(nextAvailableFileURL: targetURL)
@@ -184,7 +184,7 @@ final class ActionExecutorTests: XCTestCase {
         )
 
         _ = try executor.execute(
-            .createTextFile,
+            .createFile,
             context: makeContext(urls: [selectedURL])
         )
 
@@ -195,7 +195,7 @@ final class ActionExecutorTests: XCTestCase {
         XCTAssertEqual(fileCreator.createdFileURLs, [targetURL])
     }
 
-    func testCreateTextFileRejectsInvalidFileExtension() {
+    func testCreateFileRejectsInvalidFileExtension() {
         let fileCreator = SpyFileCreator()
         let executor = ActionExecutor(
             fileCreator: fileCreator,
@@ -209,7 +209,7 @@ final class ActionExecutorTests: XCTestCase {
 
         XCTAssertThrowsError(
             try executor.execute(
-                .createTextFile,
+                .createFile,
                 context: makeContext(urls: [selectedURL])
             )
         ) { error in
@@ -222,7 +222,7 @@ final class ActionExecutorTests: XCTestCase {
         XCTAssertEqual(fileCreator.createdFileURLs, [])
     }
 
-    func testCreateTextFileRejectsEmptyFileExtensionPart() {
+    func testCreateFileRejectsEmptyFileExtensionPart() {
         let fileCreator = SpyFileCreator()
         let executor = ActionExecutor(
             fileCreator: fileCreator,
@@ -236,7 +236,7 @@ final class ActionExecutorTests: XCTestCase {
 
         XCTAssertThrowsError(
             try executor.execute(
-                .createTextFile,
+                .createFile,
                 context: makeContext(urls: [selectedURL])
             )
         ) { error in
@@ -418,13 +418,13 @@ final class ActionExecutorTests: XCTestCase {
 
         XCTAssertThrowsError(
             try executor.execute(
-                .createTextFile,
+                .createFile,
                 context: makeContext(urls: [])
             )
         ) { error in
             XCTAssertEqual(
                 error as? ActionExecutionError,
-                .unavailableAction(.createTextFile)
+                .unavailableAction(.createFile)
             )
         }
         XCTAssertEqual(pasteboardWriter.writtenStrings, [])
@@ -552,7 +552,7 @@ final class ActionRegistryTests: XCTestCase {
         XCTAssertTrue(actionIDs.contains(.copyPath))
         XCTAssertTrue(actionIDs.contains(.copyFileName))
         XCTAssertTrue(actionIDs.contains(.copyDirectoryPath))
-        XCTAssertTrue(actionIDs.contains(.createTextFile))
+        XCTAssertTrue(actionIDs.contains(.createFile))
         XCTAssertTrue(actionIDs.contains(.createFolder))
         XCTAssertTrue(actionIDs.contains(.openTerminalHere))
     }
@@ -569,7 +569,7 @@ final class ActionRegistryTests: XCTestCase {
         XCTAssertTrue(actionIDs.contains(.copyPath))
         XCTAssertTrue(actionIDs.contains(.copyFileName))
         XCTAssertTrue(actionIDs.contains(.copyDirectoryPath))
-        XCTAssertFalse(actionIDs.contains(.createTextFile))
+        XCTAssertFalse(actionIDs.contains(.createFile))
         XCTAssertFalse(actionIDs.contains(.createFolder))
         XCTAssertTrue(actionIDs.contains(.openTerminalHere))
     }
