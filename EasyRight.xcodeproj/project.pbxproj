@@ -33,6 +33,7 @@
 		C1A2B3C4D5E6478899AA0006 /* SharedSettingsStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A2B3C4D5E6478899AA0005 /* SharedSettingsStorage.swift */; };
 		C1A2B3C4D5E6478899AA0008 /* SharedStorageStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A2B3C4D5E6478899AA0007 /* SharedStorageStatusView.swift */; };
 		C1A2B3C4D5E6478899AA0010 /* FileURL+EasyRight.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A2B3C4D5E6478899AA0009 /* FileURL+EasyRight.swift */; };
+		C1A2B3C4D5E6478899AA0012 /* FileContentReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A2B3C4D5E6478899AA0011 /* FileContentReader.swift */; };
 		A365C0C91E17647FC215940E /* FileSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D05FDFF6F28FAFB2B9E694B /* FileSelection.swift */; };
 		A46F5523C60BE733C9865EF0 /* RightClickActionDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C860ABD5B27720CEED566F4 /* RightClickActionDescriptor.swift */; };
 		FEF7102EFAD5493582C1901A /* CodeOpener.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8644DEC6ADF46A1BB13B193 /* CodeOpener.swift */; };
@@ -122,6 +123,7 @@
 		C1A2B3C4D5E6478899AA0005 /* SharedSettingsStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedSettingsStorage.swift; sourceTree = "<group>"; };
 		C1A2B3C4D5E6478899AA0007 /* SharedStorageStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedStorageStatusView.swift; sourceTree = "<group>"; };
 		C1A2B3C4D5E6478899AA0009 /* FileURL+EasyRight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileURL+EasyRight.swift"; sourceTree = "<group>"; };
+		C1A2B3C4D5E6478899AA0011 /* FileContentReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileContentReader.swift; sourceTree = "<group>"; };
 		DB72D8FD951B4BDE877FEFE4 /* ItemNamePrompter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemNamePrompter.swift; sourceTree = "<group>"; };
 		D28056BBB2CD40818B4762D1 /* ActionExecutorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionExecutorTests.swift; sourceTree = "<group>"; };
 		DCBFBCF5800CFD888A8FF264 /* EasyRightFinderExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = EasyRightFinderExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -202,6 +204,7 @@
 				116B612A420948B08326EB95 /* ApplicationItemOpener.swift */,
 				F8644DEC6ADF46A1BB13B193 /* CodeOpener.swift */,
 				24D355B19B1D4D97B41DD899 /* CursorOpener.swift */,
+				C1A2B3C4D5E6478899AA0011 /* FileContentReader.swift */,
 				DB72D8FD951B4BDE877FEFE4 /* ItemNamePrompter.swift */,
 				93DAAC2365A3498B99C7F681 /* PasteboardWriter.swift */,
 				2325E3CE46EC49E6B3E28F70 /* TerminalOpener.swift */,
@@ -454,6 +457,7 @@
 				C1A2B3C4D5E6478899AA0002 /* FinderScopePreferences.swift in Sources */,
 				A365C0C91E17647FC215940E /* FileSelection.swift in Sources */,
 				C1A2B3C4D5E6478899AA0010 /* FileURL+EasyRight.swift in Sources */,
+				C1A2B3C4D5E6478899AA0012 /* FileContentReader.swift in Sources */,
 				B9C67A4499EA4F34AD8646DA /* ItemNamePrompter.swift in Sources */,
 				8E73FF5D6CBF4893921EF10A /* PasteboardWriter.swift in Sources */,
 				C1A2B3C4D5E6478899AA0006 /* SharedSettingsStorage.swift in Sources */,

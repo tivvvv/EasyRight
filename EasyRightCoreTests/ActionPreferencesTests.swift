@@ -40,6 +40,7 @@ final class ActionPreferencesTests: XCTestCase {
                 .openWithCode,
                 .copyFileName,
                 .createFile,
+                .copyFileContents,
                 .copyDirectoryPath,
                 .createFolder,
                 .openWithTerminal,

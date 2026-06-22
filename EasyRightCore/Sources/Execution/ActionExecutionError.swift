@@ -6,6 +6,7 @@ public enum ActionExecutionError: Error, Equatable, Sendable {
     case cursorApplicationNotFound
     case directoryCreationFailed(URL)
     case emptySelection
+    case fileContentReadFailed(URL)
     case fileCreationFailed(URL)
     case invalidFileExtension(String)
     case invalidItemName(String)
@@ -37,6 +38,8 @@ public extension ActionExecutionError {
             "Could not create the folder."
         case .emptySelection:
             "Select at least one item and try again."
+        case .fileContentReadFailed:
+            "Could not read the file as UTF-8 text."
         case .fileCreationFailed:
             "Could not create the file."
         case .invalidFileExtension:

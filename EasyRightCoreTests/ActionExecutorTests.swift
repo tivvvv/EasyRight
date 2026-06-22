@@ -67,6 +67,95 @@ final class ActionExecutorTests: XCTestCase {
         XCTAssertEqual(result.message, "Copied 2 directory paths.")
     }
 
+    func testCopyFileContentsWritesSelectedFileText() throws {
+        let pasteboardWriter = SpyPasteboardWriter()
+        let selectedURL = URL(fileURLWithPath: "/Users/example/Documents/Notes.md")
+        let fileContentReader = SpyFileContentReader(contentsByURL: [
+            selectedURL: "# Notes\nHello",
+        ])
+        let executor = ActionExecutor(
+            fileCreator: SpyFileCreator(),
+            fileContentReader: fileContentReader,
+            pasteboardWriter: pasteboardWriter
+        )
+
+        let result = try executor.execute(
+            .copyFileContents,
+            context: makeContext(urls: [selectedURL])
+        )
+
+        XCTAssertEqual(fileContentReader.requestedFileURLs, [selectedURL])
+        XCTAssertEqual(pasteboardWriter.writtenStrings, ["# Notes\nHello"])
+        XCTAssertEqual(result.message, "Copied contents of Notes.md.")
+    }
+
+    func testCopyFileContentsWritesEmptyFileText() throws {
+        let pasteboardWriter = SpyPasteboardWriter()
+        let selectedURL = URL(fileURLWithPath: "/Users/example/Documents/Empty.txt")
+        let executor = ActionExecutor(
+            fileCreator: SpyFileCreator(),
+            fileContentReader: SpyFileContentReader(contentsByURL: [
+                selectedURL: "",
+            ]),
+            pasteboardWriter: pasteboardWriter
+        )
+
+        let result = try executor.execute(
+            .copyFileContents,
+            context: makeContext(urls: [selectedURL])
+        )
+
+        XCTAssertEqual(pasteboardWriter.writtenStrings, [""])
+        XCTAssertEqual(result.message, "Copied contents of Empty.txt.")
+    }
+
+    func testCopyFileContentsThrowsWhenFileCannotBeRead() {
+        let pasteboardWriter = SpyPasteboardWriter()
+        let selectedURL = URL(fileURLWithPath: "/Users/example/Documents/Binary.dat")
+        let fileContentReader = SpyFileContentReader(
+            errorToThrow: ActionExecutionError.fileContentReadFailed(selectedURL)
+        )
+        let executor = ActionExecutor(
+            fileCreator: SpyFileCreator(),
+            fileContentReader: fileContentReader,
+            pasteboardWriter: pasteboardWriter
+        )
+
+        XCTAssertThrowsError(
+            try executor.execute(
+                .copyFileContents,
+                context: makeContext(urls: [selectedURL])
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? ActionExecutionError,
+                .fileContentReadFailed(selectedURL)
+            )
+        }
+        XCTAssertEqual(pasteboardWriter.writtenStrings, [])
+    }
+
+    func testCopyFileContentsIsUnavailableForDirectory() {
+        let selectedURL = URL(fileURLWithPath: "/Users/example/Documents", isDirectory: true)
+        let executor = ActionExecutor(
+            fileCreator: SpyFileCreator(),
+            fileContentReader: SpyFileContentReader(),
+            pasteboardWriter: SpyPasteboardWriter()
+        )
+
+        XCTAssertThrowsError(
+            try executor.execute(
+                .copyFileContents,
+                context: makeContext(urls: [selectedURL])
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? ActionExecutionError,
+                .unavailableAction(.copyFileContents)
+            )
+        }
+    }
+
     func testCreateFileRequestsAvailableNameInSelectedFileDirectory() throws {
         let targetURL = URL(fileURLWithPath: "/Users/example/Documents/Project Notes.txt")
         let fileCreator = SpyFileCreator(nextAvailableFileURL: targetURL)
@@ -633,6 +722,18 @@ final class ActionExecutionFeedbackTests: XCTestCase {
         )
     }
 
+    func testFileContentReadFailedHasUserFeedbackMessage() {
+        let error = ActionExecutionError.fileContentReadFailed(
+            URL(fileURLWithPath: "/Users/example/Documents/Binary.dat")
+        )
+
+        XCTAssertFalse(error.shouldSuppressUserFeedback)
+        XCTAssertEqual(
+            error.userFeedbackMessage,
+            "Could not read the file as UTF-8 text."
+        )
+    }
+
     func testCodeApplicationNotFoundHasUserFeedbackMessage() {
         let error = ActionExecutionError.codeApplicationNotFound
 
@@ -778,6 +879,35 @@ final class SystemFileCreatorTests: XCTestCase {
     }
 }
 
+final class SystemFileContentReaderTests: XCTestCase {
+    func testStringContentsReadsUTF8Text() throws {
+        let fileManager = FileManager.default
+        let directoryURL = try makeTemporaryDirectory(fileManager: fileManager)
+        defer {
+            try? fileManager.removeItem(at: directoryURL)
+        }
+        let fileURL = directoryURL.appendingPathComponent("Notes.md")
+        try "# Notes\nHello".write(to: fileURL, atomically: true, encoding: .utf8)
+        let reader = SystemFileContentReader()
+
+        let contents = try reader.stringContents(of: fileURL)
+
+        XCTAssertEqual(contents, "# Notes\nHello")
+    }
+
+    func testStringContentsMapsReadFailure() {
+        let fileURL = URL(fileURLWithPath: "/tmp/EasyRightMissing-\(UUID().uuidString).txt")
+        let reader = SystemFileContentReader()
+
+        XCTAssertThrowsError(try reader.stringContents(of: fileURL)) { error in
+            XCTAssertEqual(
+                error as? ActionExecutionError,
+                .fileContentReadFailed(fileURL)
+            )
+        }
+    }
+}
+
 final class ActionRegistryTests: XCTestCase {
     func testStandardRegistryIncludesCreateActionsForSingleSelection() {
         let registry = ActionRegistry.standard
@@ -789,6 +919,7 @@ final class ActionRegistryTests: XCTestCase {
 
         XCTAssertTrue(actionIDs.contains(.copyPath))
         XCTAssertTrue(actionIDs.contains(.copyFileName))
+        XCTAssertTrue(actionIDs.contains(.copyFileContents))
         XCTAssertTrue(actionIDs.contains(.copyDirectoryPath))
         XCTAssertTrue(actionIDs.contains(.createFile))
         XCTAssertTrue(actionIDs.contains(.createFolder))
@@ -809,6 +940,7 @@ final class ActionRegistryTests: XCTestCase {
         XCTAssertTrue(actionIDs.contains(.copyPath))
         XCTAssertTrue(actionIDs.contains(.copyFileName))
         XCTAssertTrue(actionIDs.contains(.copyDirectoryPath))
+        XCTAssertFalse(actionIDs.contains(.copyFileContents))
         XCTAssertFalse(actionIDs.contains(.createFile))
         XCTAssertFalse(actionIDs.contains(.createFolder))
         XCTAssertTrue(actionIDs.contains(.openWithTerminal))
@@ -918,6 +1050,30 @@ private final class SpyPasteboardWriter: PasteboardWriting {
         }
 
         writtenStrings.append(value)
+    }
+}
+
+private final class SpyFileContentReader: FileContentReading {
+    private(set) var requestedFileURLs: [URL] = []
+    var contentsByURL: [URL: String]
+    var errorToThrow: Error?
+
+    init(
+        contentsByURL: [URL: String] = [:],
+        errorToThrow: Error? = nil
+    ) {
+        self.contentsByURL = contentsByURL
+        self.errorToThrow = errorToThrow
+    }
+
+    func stringContents(of fileURL: URL) throws -> String {
+        requestedFileURLs.append(fileURL)
+
+        if let errorToThrow {
+            throw errorToThrow
+        }
+
+        return contentsByURL[fileURL] ?? ""
     }
 }
 

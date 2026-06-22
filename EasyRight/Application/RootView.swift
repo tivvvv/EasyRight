@@ -353,7 +353,7 @@ private extension SelectionRule {
         case .directorySelection:
             "Directory"
         case .singleFile:
-            "Single file"
+            "Single file only"
         case .singleDirectory:
             "Single directory"
         case .filesOnly:

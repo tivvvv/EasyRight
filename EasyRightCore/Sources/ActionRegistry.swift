@@ -5,6 +5,7 @@ public struct ActionRegistry: Sendable {
     public static let standard = ActionRegistry(actions: [
         .copyPath,
         .copyFileName,
+        .copyFileContents,
         .copyDirectoryPath,
         .createFile,
         .createFolder,
@@ -41,6 +42,13 @@ public extension RightClickActionDescriptor {
         title: "Copy File Name",
         systemImageName: "textformat",
         selectionRule: .nonEmptySelection
+    )
+
+    static let copyFileContents = RightClickActionDescriptor(
+        id: .copyFileContents,
+        title: "Copy File Contents",
+        systemImageName: "doc.text",
+        selectionRule: .singleFile
     )
 
     static let copyDirectoryPath = RightClickActionDescriptor(

@@ -4,6 +4,7 @@ import Foundation
 public final class ActionExecutor {
     public static let supportedActionIDs: Set<ActionIdentifier> = [
         .copyDirectoryPath,
+        .copyFileContents,
         .copyFileName,
         .copyPath,
         .createFolder,
@@ -14,6 +15,7 @@ public final class ActionExecutor {
     ]
 
     private let fileCreator: FileCreating
+    private let fileContentReader: FileContentReading
     private let itemNamePrompter: ItemNamePrompting
     private let pasteboardWriter: PasteboardWriting
     private let terminalOpener: TerminalOpening
@@ -22,6 +24,7 @@ public final class ActionExecutor {
 
     public init(
         fileCreator: FileCreating = SystemFileCreator(),
+        fileContentReader: FileContentReading = SystemFileContentReader(),
         itemNamePrompter: ItemNamePrompting = SystemItemNamePrompter(),
         pasteboardWriter: PasteboardWriting = SystemPasteboardWriter(),
         terminalOpener: TerminalOpening = SystemTerminalOpener(),
@@ -29,6 +32,7 @@ public final class ActionExecutor {
         codeOpener: CodeOpening = SystemCodeOpener()
     ) {
         self.fileCreator = fileCreator
+        self.fileContentReader = fileContentReader
         self.itemNamePrompter = itemNamePrompter
         self.pasteboardWriter = pasteboardWriter
         self.terminalOpener = terminalOpener
@@ -52,6 +56,8 @@ public final class ActionExecutor {
         switch action.id {
         case .copyDirectoryPath:
             return try copyDirectoryPath(context: context)
+        case .copyFileContents:
+            return try copyFileContents(context: context)
         case .copyFileName:
             return try copyFileName(context: context)
         case .copyPath:
@@ -92,6 +98,17 @@ public final class ActionExecutor {
             context.selection.urls.map(\.lastPathComponent),
             singularName: "file name",
             pluralName: "file names"
+        )
+    }
+
+    private func copyFileContents(context: ActionExecutionContext) throws -> ActionExecutionResult {
+        let selectedURL = try singleSelectedURL(context: context)
+        let fileContents = try fileContentReader.stringContents(of: selectedURL)
+
+        try pasteboardWriter.writeString(fileContents)
+
+        return ActionExecutionResult(
+            message: "Copied contents of \(selectedURL.lastPathComponent)."
         )
     }
 

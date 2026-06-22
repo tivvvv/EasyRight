@@ -12,6 +12,7 @@ public struct ActionIdentifier: RawRepresentable, Hashable, Codable, Sendable {
 public extension ActionIdentifier {
     static let copyPath = ActionIdentifier(rawValue: "copy_path")
     static let copyFileName = ActionIdentifier(rawValue: "copy_file_name")
+    static let copyFileContents = ActionIdentifier(rawValue: "copy_file_contents")
     static let copyDirectoryPath = ActionIdentifier(rawValue: "copy_directory_path")
     static let createFile = ActionIdentifier(rawValue: "create_file")
     static let createFolder = ActionIdentifier(rawValue: "create_folder")

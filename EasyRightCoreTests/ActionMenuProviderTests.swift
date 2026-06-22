@@ -27,6 +27,7 @@ final class ActionMenuProviderTests: XCTestCase {
             [
                 .openWithCode,
                 .copyFileName,
+                .copyFileContents,
                 .copyDirectoryPath,
                 .createFile,
                 .createFolder,
@@ -51,6 +52,7 @@ final class ActionMenuProviderTests: XCTestCase {
 
         XCTAssertFalse(actionIDs.contains(.createFile))
         XCTAssertFalse(actionIDs.contains(.createFolder))
+        XCTAssertFalse(actionIDs.contains(.copyFileContents))
         XCTAssertTrue(actionIDs.contains(.copyPath))
         XCTAssertTrue(actionIDs.contains(.openWithCursor))
     }
